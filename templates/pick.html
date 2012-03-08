@@ -1,0 +1,26 @@
+[% WRAPPER '_wrapper.html' %]
+
+<div id="files">
+  [% IF sha == 'HEAD' %]<a href="/[% id %]/HEAD/edit">edit</a> [% END %]
+  [% FOR file IN files %]
+    <div class="blob">
+      <div>[% file.name %]</div>
+      <pre class="code">[% file.blob.contents %]</pre>
+    </div>
+  [% END %]
+</div>
+
+<div id="logs">
+  [% FOR log IN logs %]
+    <div class="log">
+      <dl>
+        <dt>time</dt>
+        <dd class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</dd>
+        <dt>hash</dt>
+        <dd class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></dd>
+      </dl>
+    </div>
+  [% END %]
+</div>
+
+[% END # WRAPPER %]

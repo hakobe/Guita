@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>[% title %] Guita</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <link rel="shortcut icon" href="/images/favicon.ico" type="image/x-icon"/>
+
+    <!--[if lt IE 9]>
+    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    [%- JS = [] %]
+    [%- JS.push("http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
+    [%- JS.push("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
+    [%- JS.push("/js/date.extensions.js") %]
+
+    [%- FOR path IN JS %]
+    <script type="text/javascript" src="[% path %]"></script>
+    [%- END %]
+
+    <link rel="stylesheet" href="/js/highlight/styles/zenburn.css" type="text/css" media="all" />
+
+  </head>
+  <body class="[% id %]">
+    <div class="header">
+      <a href="/">Guita</a>
+    </div>
+    <div id="content" class="content">
+      [%- content %]
+    </div>
+    <!--
+    <div class="footer">
+      hakobe
+    </div>
+    -->
+  </body>
+</html>

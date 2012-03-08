@@ -1,0 +1,17 @@
+[% WRAPPER '_wrapper.html' %]
+
+<form action="/picks/create" method="post">
+  <div>
+    <div>
+      <input type="text" name="name" value="" placeholder="filename here"></input>
+    </div>
+    <div>
+      <textarea name="code" rows="20" cols="80" placeholder="write code here"></textarea>
+    </div>
+    <div>
+      <input type="submit" value="post"></input>
+    </div>
+  </div>
+</form>
+
+[% END # WRAPPER %]
