@@ -47,6 +47,15 @@ my $XSLATE = Text::Xslate->new(
             my $epoch = shift;
             DateTime->from_epoch(epoch => $epoch).q();
         },
+        strip => sub {
+            my ($text, $length) = @_;
+            $length ||= 140;
+
+            return $text if length($text) <= ($length - 3);
+
+            my $result = substr $text, 0, $length;
+            "$result\n...";
+        },
         dump => sub {
             local $Data::Dumper::Varname = '';
             local $Data::Dumper::Sortkeys = 1;

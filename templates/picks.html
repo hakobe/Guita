@@ -1,14 +1,26 @@
 [% WRAPPER '_wrapper.html' %]
 
-  <a href="/picks/create">create</a>
-
-<div id="recents">
-  [% FOR recent IN recents %]
-    <div class="recent">
-      <div><a href="/[% recent.pick.uuid %]">[% recent.name %]</a> [% recent.pick.created %]</div>
-      <pre class="code">[% recent.blob.contents %]</pre>
-    </div>
-  [% END %]
+<!--
+<div class="row">
+  <div class="span8">
+    <h1>Picks</h1>
+  </div>
+</div>
+-->
+<div class="row">
+  <div id="recents" class="span8">
+    [% FOR recent IN recents %]
+      <div class="pick-show">
+        <div class="pick-info">
+          <a href="/[% recent.pick.uuid %]">Pick:[% recent.pick.uuid %]</a> [% recent.pick.created %]
+        </div>
+        <pre class="prettyprint linenums">[% strip(recent.blob.contents, 140) %]</pre>
+      </div>
+    [% END %]
+  </div>
+  <div id="login" class="span4">
+    <h2>Login</h2>
+  </div>
 </div>
 
 [% END # WRAPPER %]

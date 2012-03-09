@@ -1,17 +1,20 @@
 [% WRAPPER '_wrapper.html' %]
 
-<form action="/picks/create" method="post">
-  <div>
-    <div>
-      <input type="text" name="name" value="" placeholder="filename here"></input>
-    </div>
-    <div>
-      <textarea name="code" rows="20" cols="80" placeholder="write code here"></textarea>
-    </div>
-    <div>
-      <input type="submit" value="post"></input>
-    </div>
+<div class="row">
+  <div class="span12">
+    <h1>Create</h1>
+    <form action="/picks/create" method="post" class="well code-form">
+      <div>
+          <input class="code-description" type="text" name="description" value="" placeholder="description here"></input>
+          <br>
+          <input class="code-filename" type="text" name="name" value="" placeholder="filename here"></input>
+          <br>
+          <textarea class="code" name="code" rows="15" cols="80" placeholder="write code here"></textarea>
+          <br>
+          <input class="btn-primary btn-large" type="submit" value="Post"></input>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 
 [% END # WRAPPER %]

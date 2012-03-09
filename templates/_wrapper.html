@@ -10,29 +10,49 @@
     <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
     <![endif]-->
 
-    [%- JS = [] %]
-    [%- JS.push("http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
-    [%- JS.push("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
-    [%- JS.push("/js/date.extensions.js") %]
-
-    [%- FOR path IN JS %]
-    <script type="text/javascript" src="[% path %]"></script>
-    [%- END %]
-
-    <link rel="stylesheet" href="/js/highlight/styles/zenburn.css" type="text/css" media="all" />
+    <!-- <link rel="stylesheet" href="/js/highlight/styles/zenburn.css" type="text/css" media="all" /> -->
+    <link rel="stylesheet" href="/css/bootstrap.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="/css/guita.css" type="text/css" media="all" />
 
   </head>
-  <body class="[% id %]">
-    <div class="header">
-      <a href="/">Guita</a>
+  <body onload="prettyPrint();">
+    <div class="global-container">
+      <div class="navbar navbar-fixed-top">
+        <div class="navbar-inner">
+          <div class="container">
+            <a class="brand" href="/">Guita</a>
+            <div class="nav-collapse">
+              <ul class="nav">
+                <li class="divider-vertical"></li>
+                <li><a href="/picks">Picks</a></li>
+                <li><a href="/picks/create">Create</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="container">
+        <div id="content">
+          [%- content %]
+        </div>
+        <!--
+        <div class="footer">
+          hakobe
+        </div>
+        -->
+      </div>
+
+      [%- JS = [] %]
+      [%- JS.push("http://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
+      [%- JS.push("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
+      [%- JS.push("http://twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js") %]
+      [%- JS.push("/js/bootstrap.js") %]
+      [%- JS.push("/js/date.extensions.js") %]
+
+      [%- FOR path IN JS %]
+      <script type="text/javascript" src="[% path %]"></script>
+      [%- END %]
     </div>
-    <div id="content" class="content">
-      [%- content %]
-    </div>
-    <!--
-    <div class="footer">
-      hakobe
-    </div>
-    -->
   </body>
 </html>

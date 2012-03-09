@@ -1,26 +1,41 @@
 [% WRAPPER '_wrapper.html' %]
 
-<div id="files">
-  [% IF sha == 'HEAD' %]<a href="/[% id %]/HEAD/edit">edit</a> [% END %]
-  [% FOR file IN files %]
-    <div class="blob">
-      <div>[% file.name %]</div>
-      <pre class="code">[% file.blob.contents %]</pre>
-    </div>
-  [% END %]
+<div class="row">
+  <div id="pick-info" class="span8">
+    <h1>Pick: [% id %] [% IF sha == 'HEAD' %]<a href="/[% id %]/HEAD/edit"> <button class="btn-mini">edit</button></a>[% END %]</h1>
+    <!--
+    <dl>
+      <dt>Created</dt>
+      <dd>[% pick.created %]</dd>
+    </dl>
+    -->
+  </div>
 </div>
-
-<div id="logs">
-  [% FOR log IN logs %]
-    <div class="log">
-      <dl>
-        <dt>time</dt>
-        <dd class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</dd>
-        <dt>hash</dt>
-        <dd class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></dd>
-      </dl>
+<div class="row">
+  <div id="pick-main" class="span8">
+    <div id="pick-files">
+      [% FOR file IN files %]
+        <div class="code-show">
+          <div class="code-info">
+            <span class="code-filename">[% file.name %]</span>
+          </div>
+          <pre class="prettyprint linenums">[% file.blob.contents %]</pre>
+        </div>
+      [% END %]
     </div>
-  [% END %]
+  </div>
+
+  <div id="pick-sidebar" class="span4">
+    <h2>revisions</h2>
+    <ul class="logs unstyled">
+      [% FOR log IN logs %]
+        <li class="log">
+          <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span>
+          <span class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</span>
+        </li>
+      [% END %]
+    </ul>
+  </div>
 </div>
 
 [% END # WRAPPER %]

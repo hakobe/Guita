@@ -22,7 +22,7 @@ builder {
 
     enable "Plack::Middleware::Runtime";
     enable "Plack::Middleware::StaticShared",
-        cache => Cache::LRU->new(size => 10),
+    # cache => Cache::LRU->new(size => 10),
         base => './static/',
         binds => [
             {

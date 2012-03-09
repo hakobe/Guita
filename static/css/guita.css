@@ -1,0 +1,40 @@
+.global-container {
+    padding-top: 55px;
+}
+
+h1 {
+    padding-bottom: 10px;
+}
+
+.code-form .code {
+    width: 100%;
+}
+
+.code-form .code-description {
+    width: 100%;
+}
+
+#pick-files {
+    margin-top: 10px;
+}
+
+.code-show {
+}
+
+.code-show .code-info {
+    padding: 5px;
+    color: #A9A9A9;
+}
+
+.code-show .code-info .code-filename {
+    font-size: 16px;
+}
+
+.pick-show {
+    margin-bottom: 20px;
+}
+
+.pick-show .pick-info {
+    padding: 5px;
+    font-size: 16px;
+}
