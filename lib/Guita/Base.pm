@@ -12,7 +12,6 @@ use Router::Simple;
 use Try::Tiny;
 use Class::Load qw(load_class);
 use Plack::Session;
-use SQL::NamedPlaceholder;
 
 use Guita::Config;
 use Guita::Exception;
@@ -131,36 +130,6 @@ sub dbh {
     };
 }
 
-sub uuid_short {
-    my ($self, $name) = @_;
-    $self->dbh($name)->selectrow_hashref("SELECT UUID_SHORT() as uuid_short", { Slice => {} })->{uuid_short};
-}
-
-sub single {
-    my ($self, %args) = @_;
-    return $self->array(%args)->[0];
-}
-
-sub array {
-    my ($self, %opts) = @_;
-    load_class $opts{class} if $opts{class};
-
-    my ($sql, $bind) = SQL::NamedPlaceholder::bind_named($opts{sql}, $opts{bind} || {});
-
-    if (config->param('explain')) {
-        eval {
-            my $explain = $self->dbh($opts{db})->selectrow_hashref("EXPLAIN $sql", { Slice => {} }, @$bind);
-            if ($explain->{Extra} =~ m{filesort} && $explain->{rows} > 1) {
-                $explain->{sql} = $sql;
-                use Data::Dumper;
-                warn Dumper $explain ;
-            }
-        };
-    }
-
-    my $res = $self->dbh($opts{db})->selectall_arrayref($sql, { Slice => {} }, @$bind);
-    return $opts{class} ? [ map { bless $_, $opts{class} } @$res ] : $res;
-}
 
 sub id {
     my ($self) = @_;

@@ -4,11 +4,11 @@ use warnings;
 
 use Guita::Config;
 use Guita::Git;
+use Guita::Mapper::DBI;
 use Guita::Mapper::Git;
 use Path::Class;
 use Try::Tiny;
 
-use SQL::NamedPlaceholder;
 
 sub default {
     my ($class, $c) = @_;
@@ -19,21 +19,9 @@ sub default {
 sub create {
     my ($class, $c) = @_;
     if ($c->req->method eq 'POST') {
-        my $uuid = $c->uuid_short('guita');
-        my ($sql, $bind) = SQL::NamedPlaceholder::bind_named(
-            q[
-                INSERT INTO pick
-                SET
-                    uuid = :uuid,
-                    user = :user
-            ],
-            {
-                uuid => $uuid,
-                user => 'hakobe',
-            },
-        );
-        $c->dbh('guita')->prepare_cached($sql)->execute(@$bind);
+        my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
 
+        my $uuid = $dbi_mapper->create_pick({ user => 'hakobe' });
         my $work_tree = config->param('repository_base')->subdir($uuid);
         $work_tree->mkpath;
         Guita::Git->run(init => $work_tree->stringify);
@@ -75,13 +63,8 @@ sub edit {
 
     if ($c->req->method eq 'GET') {
         my $tree = $git_mapper->tree_with_children('HEAD'); # とはいえHEADしか編集できない
-
-        my $pick = $c->single(
-            db => 'guita',
-            class => 'Guita::Model::Pick',
-            sql => 'SELECT * FROM pick WHERE uuid = :uuid',
-            bind => { uuid => $c->id },
-        );
+        my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+        my $pick = $dbi_mapper->pick($c->id);
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
         my $files = [ map { +{
@@ -121,12 +104,8 @@ sub pick {
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
-    my $pick = $c->single(
-        db => 'guita',
-        class => 'Guita::Model::Pick',
-        sql => 'SELECT * FROM pick WHERE uuid = :uuid',
-        bind => { uuid => $c->id },
-    );
+    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $pick = $dbi_mapper->pick($c->id);
 
     my $work_tree = config->param('repository_base')->subdir($c->id);
     my $git_mapper = Guita::Mapper::Git->new->with(
@@ -172,11 +151,7 @@ sub picks {
             name => $blob_with_name->{name},
             blob => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
         }
-    } @{ $c->array(
-        db    => 'guita',
-        class => 'Guita::Model::Pick',
-        sql   => 'SELECT * FROM pick ORDER BY created desc LIMIT 5',
-    ) } ];
+    } @{ Guita::Mapper::DBI->new->with($c->dbh('guita'))->picks } ];
 
     $c->html('picks.html', {
         recents => $recents,
