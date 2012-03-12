@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Exporter::Lite;
-our @EXPORT = qw(html redirect render);
+our @EXPORT = qw(html text redirect render);
 
 use Guita::Config;
 
@@ -78,6 +78,13 @@ sub html {
     my $content = $self->render($name, $vars);
 
     $self->res->content_type('text/html; charset=utf-8');
+    $self->res->content(encode_utf8 $content);
+}
+
+sub text {
+    my ($self, $content) = @_;
+
+    $self->res->content_type('text/plain; charset=utf-8');
     $self->res->content(encode_utf8 $content);
 }
 

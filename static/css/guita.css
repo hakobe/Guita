@@ -3,7 +3,28 @@
 }
 
 h1 {
+    font-size: 24px;
     padding-bottom: 10px;
+}
+
+h2 {
+    font-size: 22px;
+}
+
+.navbar .avator-img {
+    position: absolute;
+    top: 2px;
+    left: -22px;
+}
+
+.navbar .avator-img a {
+    padding: 0px;
+    margin: 0px;
+}
+
+.navbar .avator-img img {
+    width:  16px;
+    height: 16px;
 }
 
 .code-form .code {
@@ -30,11 +51,59 @@ h1 {
     font-size: 16px;
 }
 
+.picks-pager {
+    font-size: 20px;
+    margin: 15px auto;
+    margin-bottom: 40px;
+    text-align: center;
+}
+
 .pick-show {
     margin-bottom: 20px;
 }
 
-.pick-show .pick-info {
+.pick-show .pick-info-short {
     padding: 5px;
     font-size: 16px;
+}
+
+.pick-show .pick-info-short .pick-description {
+    margin-top: 5px;
+    font-size: 14px;
+}
+
+.pick-info-short .avator-img img {
+    position: relative;
+    top: 2px;
+    width:  16px;
+    height: 16px;
+}
+
+.pick-delete {
+    padding-top: 20px;
+}
+
+#pick-info button {
+    position: relative;
+    top: -3px;
+}
+
+#pick-info .pick-description {
+    font-size: 16px;
+}
+
+#pick-delete-alert {
+    margin-top: 10px;
+    padding: 10px;
+}
+
+#pick-delete-alert form {
+    display: inline;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+#pick-delete-alert form input {
+    margin: 0 auto;
 }

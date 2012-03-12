@@ -5,9 +5,12 @@ use warnings;
 use parent qw(Guita::Mapper);
 
 use Guita::Config;
+use Guita::Utils qw(now);
 
 use Class::Load qw(load_class);
 use SQL::NamedPlaceholder;
+use JSON::XS;
+use Encode;
 
 sub dbh {
     my ($self) = @_;
@@ -45,6 +48,88 @@ sub array {
     return $opts{class} ? [ map { bless $_, $opts{class} } @$res ] : $res;
 }
 
+sub create_user {
+    my ($self, $args) = @_;
+    my $uuid = $self->uuid_short;
+    my ($sql, $bind) = SQL::NamedPlaceholder::bind_named(
+        q[
+            INSERT INTO user
+            SET
+                uuid       = :uuid,
+                github_id  = :github_id,
+                sk         = :sk,
+                sk_expires = :sk_expires,
+                struct     = :struct
+        ],
+        {
+            uuid       => $uuid,
+            github_id  => $args->{github_id},
+            sk         => $args->{sk},
+            sk_expires => now->add( days => 14 ),
+            struct     => encode_json($args->{struct}),
+        },
+    );
+    $self->dbh->prepare_cached($sql)->execute(@$bind);
+
+    $uuid;
+}
+
+sub update_user {
+    my ($self, $user) = @_;
+
+    my ($sql, $bind) = SQL::NamedPlaceholder::bind_named(
+        q[
+            UPDATE user
+            SET
+                sk         = :sk,
+                sk_expires = :sk_expires,
+                struct     = :struct
+            WHERE
+                uuid       = :uuid
+        ],
+        {
+            uuid       => $user->uuid,
+            sk         => $user->sk,
+            sk_expires => now->add( days => 14 ),
+            struct     => encode_json($user->struct),
+        },
+    );
+    $self->dbh->prepare_cached($sql)->execute(@$bind);
+};
+
+sub user_from_github_id {
+    my ($self, $github_id) = @_;
+
+    $self->single(
+        db => 'guita',
+        class => 'Guita::Model::User',
+        sql => 'SELECT * FROM user WHERE github_id = :github_id',
+        bind => { github_id => $github_id },
+    );
+}
+
+sub user_from_sk {
+    my ($self, $sk) = @_;
+
+    $self->single(
+        db => 'guita',
+        class => 'Guita::Model::User',
+        sql => 'SELECT * FROM user WHERE sk = :sk',
+        bind => { sk => $sk },
+    );
+}
+
+sub user_from_uuid {
+    my ($self, $uuid) = @_;
+
+    $self->single(
+        db => 'guita',
+        class => 'Guita::Model::User',
+        sql => 'SELECT * FROM user WHERE uuid = :uuid',
+        bind => { uuid => $uuid },
+    );
+}
+
 sub create_pick {
     my ($self, $args) = @_;
 
@@ -53,17 +138,54 @@ sub create_pick {
         q[
             INSERT INTO pick
             SET
-                uuid = :uuid,
-                user = :user
+                uuid        = :uuid,
+                description = :description,
+                user_id     = :user_id
         ],
         {
-            uuid => $uuid,
-            user => $args->{user},
+            uuid        => $uuid,
+            description => encode_utf8($args->{description}),
+            user_id     => $args->{user_id},
         },
     );
-    $self->dbh('guita')->prepare_cached($sql)->execute(@$bind);
+    $self->dbh->prepare_cached($sql)->execute(@$bind);
 
     $uuid;
+}
+
+sub update_pick {
+    my ($self, $pick) = @_;
+
+    my ($sql, $bind) = SQL::NamedPlaceholder::bind_named(
+        q[
+            UPDATE pick
+            SET
+                description = :description
+            WHERE
+                uuid = :uuid
+        ],
+        {
+            uuid        => $pick->uuid,
+            description => encode_utf8($pick->description),
+        },
+    );
+    $self->dbh->prepare_cached($sql)->execute(@$bind);
+}
+
+sub delete_pick {
+    my ($self, $pick) = @_;
+
+    my ($sql, $bind) = SQL::NamedPlaceholder::bind_named(
+        q[
+            DELETE from pick
+            WHERE 
+                uuid    = :uuid
+        ],
+        {
+            uuid    => $pick->uuid,
+        },
+    );
+    $self->dbh->prepare_cached($sql)->execute(@$bind);
 }
 
 sub pick {
@@ -78,12 +200,26 @@ sub pick {
 }
 
 sub picks {
-    my ($self) = @_;
+    my ($self, $args) = @_;
+    use Data::Dumper;
+    warn Dumper($args);
     $self->array(
         db    => 'guita',
         class => 'Guita::Model::Pick',
-        sql   => 'SELECT * FROM pick ORDER BY created desc LIMIT 5',
+        sql   => 'SELECT * FROM pick ORDER BY created desc LIMIT :offset,:limit',
+        bind => {
+            offset => $args->{offset} || 0,
+            limit  => $args->{limit}  || 5,
+        },
     )
+}
+
+sub picks_count {
+    my ($self) = @_;
+    $self->single(
+        db    => 'guita',
+        sql   => 'SELECT count(*) as c FROM pick',
+    )->{c};
 }
 
 1;

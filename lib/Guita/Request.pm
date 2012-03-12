@@ -76,15 +76,15 @@ sub boolean_param {
     !!$self->parameters->{$key};
 }
 
-sub single_splat {
-    my ($self) = @_;
-    return $self->path_parameters->{splat}->[0];
-}
-
-sub is_xmlhttprequest {
-    my ($self) = @_;
-    my $requested_with = $self->header('X-Requested-With') || '';
-    $requested_with eq 'XMLHttpRequest';
-}
+#sub single_splat {
+#    my ($self) = @_;
+#    return $self->path_parameters->{splat}->[0];
+#}
+#
+#sub is_xmlhttprequest {
+#    my ($self) = @_;
+#    my $requested_with = $self->header('X-Requested-With') || '';
+#    $requested_with eq 'XMLHttpRequest';
+#}
 
 1;

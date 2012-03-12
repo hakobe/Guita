@@ -1,19 +1,19 @@
 [% WRAPPER '_wrapper.html' %]
 
-[% FOR file IN files %]
-  <div class="blob_edit">
-    <form action="/[% id %]/[% sha %]/edit" method="post">
-      <div>
-        <input type="text" name="name" value="[% file.name %]"></input>
-      </div>
-      <div>
-        <textarea name="code" rows="20" cols="80" placeholder="write code here">[% file.blob.contents %]</textarea>
-      </div>
-      <div>
-        <input type="submit"  value="edit"></input>
-      </div>
-    </form>
-  </div>
-[% END %]
+<div class="span12">
+<form action="/[% id %]/[% sha %]/-/edit" method="post" class="well code-form">
+  <input class="code-description" type="text" name="description" value="[% pick.description %]" placeholder="description here"></input>
+  [% FOR file IN files %]
+    <div>
+        <br>
+        <input class="code-filename" type="text" name="name" value="[% file.name %]" placeholder="filename here"></input>
+        <br>
+        <textarea class="code" name="code" rows="15" cols="80" placeholder="write your code">[% file.blob.contents %]</textarea>
+        <br>
+    </div>
+  [% END %]
+  <input class="btn-primary btn-large" type="submit" value="Save"></input>
+</form>
+</div>
 
 [% END # WRAPPER %]

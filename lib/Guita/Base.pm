@@ -22,6 +22,9 @@ use Guita::Views;
 use Guita::Git;
 use DBI;
 
+use Guita::Mapper::DBI;
+use Guita::Model::User::Guest;
+
 our $router = Router::Simple->new;
 
 sub throw { my ($self) = shift; Guita::Exception->throw(@_) }
@@ -130,6 +133,16 @@ sub dbh {
     };
 }
 
+sub user {
+    my ($self) = @_;
+
+    $self->{_user} ||= do {
+        my $dbi_mapper = Guita::Mapper::DBI->new->with($self->dbh('guita'));
+        my $sk = $self->req->cookies->{sk};
+        my $user = $sk && $dbi_mapper->user_from_sk($sk);
+        $user || Guita::Model::User::Guest->new;
+    };
+}
 
 sub id {
     my ($self) = @_;
@@ -138,7 +151,12 @@ sub id {
 
 sub sha {
     my ($self) = @_;
-    scalar $self->req->param('sha') || 'HEAD';
+    scalar $self->req->param('sha');
+}
+
+sub filename {
+    my ($self) = @_;
+    scalar $self->req->param('filename');
 }
 
 1;

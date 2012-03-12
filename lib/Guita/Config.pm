@@ -12,8 +12,14 @@ sub root {
     $self->param('root');
 }
 
+sub github_config {
+    my ($self) = @_;
+    do $self->root->file('config.pl')->stringify;
+}
+
 common +{
-    root => file(__FILE__)->parent->parent->parent->absolute,
+    root     => file(__FILE__)->parent->parent->parent->absolute,
+    url_base => 'http://localhost:3005',
 };
 
 config default => {

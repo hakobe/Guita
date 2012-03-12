@@ -1,4 +1,4 @@
-[% WRAPPER '_wrapper.html' %]
+[% WRAPPER '_wrapper.html' WITH nav = 'picks' %]
 
 <!--
 <div class="row">
@@ -8,19 +8,58 @@
 </div>
 -->
 <div class="row">
-  <div id="recents" class="span8">
-    [% FOR recent IN recents %]
-      <div class="pick-show">
-        <div class="pick-info">
-          <a href="/[% recent.pick.uuid %]">Pick:[% recent.pick.uuid %]</a> [% recent.pick.created %]
+  <div id="recents" class="span10">
+    [% IF recents.size() > 0 %]
+      [% FOR recent IN recents %]
+        <div class="pick-show">
+          <div class="pick-info-short">
+            <a href="/[% recent.pick.uuid %]">Pick : [% recent.pick.uuid %]</a>
+            [% recent.pick.created %]
+            [% IF !recent.author.is_guest %]
+            <span class="avator-img">
+              by 
+              <img src="[% recent.author.struct.avatar_url %]"></img>
+              [% recent.author.name %]
+            </span>
+            [% END %]
+            [% IF recent.pick.description %]
+            <div class="pick-description">
+              [% strip(recent.pick.description, 140) %]
+            </div>
+            [% END %]
+          </div>
+          <pre class="prettyprint linenums">[% strip(recent.blob.contents, 140) %]</pre>
         </div>
-        <pre class="prettyprint linenums">[% strip(recent.blob.contents, 140) %]</pre>
+      [% END %]
+      <div class="picks-pager">
+        [% IF pager.has_prev %] <a href="/picks[% IF pager.page - 1 != 1 %]?page=[% pager.page - 1 %][% END %]"> prev </a> [% END %]
+        [% IF pager.has_next %] <a href="/picks?page=[% pager.page + 1 %]"> next </a> [% END %]
+      </div>
+    [% ELSE %]
+      <div class="alert alert-info">
+        <h4 class="alert-heading">First, create code picks.</h4>
+        When you <a href="/picks/create">create</a> code picks, they will be listed here.
       </div>
     [% END %]
   </div>
+  [% IF 0 %]
   <div id="login" class="span4">
-    <h2>Login</h2>
+    <!--
+      <div class="alert alert-info">
+        <h4 class="alert-heading">You can login.</h4>
+        When you <a href="/picks/create">create</a> code picks, they will be listed here.
+      </div>
+      -->
+
+    <!--
+    [% IF user.is_guest %]
+      <a href="/auth"><button class="btn-info btn-large">Login with github</button></a>
+    [% ELSE %]
+      <h2>[% user.name %]</h2>
+    [% END %]
+    -->
   </div>
+  [% END %]
 </div>
 
 [% END # WRAPPER %]

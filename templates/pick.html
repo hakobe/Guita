@@ -1,8 +1,16 @@
-[% WRAPPER '_wrapper.html' %]
+[% WRAPPER '_wrapper.html' WITH nav = 'picks' %]
 
 <div class="row">
   <div id="pick-info" class="span8">
-    <h1>Pick: [% id %] [% IF sha == 'HEAD' %]<a href="/[% id %]/HEAD/edit"> <button class="btn-mini">edit</button></a>[% END %]</h1>
+    <h1>
+      Pick: [% pick.uuid %] 
+      [% IF sha == head_sha && !user.is_guest && user.uuid == author.uuid %]
+        <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
+      [% END %]
+    </h1>
+    <div class="pick-description">
+      [% pick.description %]
+    </div>
     <!--
     <dl>
       <dt>Created</dt>
@@ -12,12 +20,13 @@
   </div>
 </div>
 <div class="row">
-  <div id="pick-main" class="span8">
+  <div id="pick-main" class="span10">
     <div id="pick-files">
       [% FOR file IN files %]
         <div class="code-show">
           <div class="code-info">
             <span class="code-filename">[% file.name %]</span>
+            <a class="code-raw-link" href="/[% id %]/[% sha %]/[% file.name %]">raw</a>
           </div>
           <pre class="prettyprint linenums">[% file.blob.contents %]</pre>
         </div>
@@ -25,16 +34,49 @@
     </div>
   </div>
 
-  <div id="pick-sidebar" class="span4">
-    <h2>revisions</h2>
+  <div id="pick-sidebar" class="span2">
+    <h2>Info</h2>
+    <dl>
+      <dt>Author</dt>
+      <dd>[% author.name %]</dd>
+      <dt>Created</dt>
+      <dd>[% pick.created %]</dd>
+    </dl>
+    <h2>Revisions</h2>
     <ul class="logs unstyled">
       [% FOR log IN logs %]
         <li class="log">
-          <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span>
+          <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span><br>
           <span class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</span>
         </li>
       [% END %]
     </ul>
+    [% IF sha == head_sha && !user.is_guest && user.uuid == author.uuid %]
+      <div class="pick-delete">
+        <button id="pick-delete-btn" class="btn-mini btn">Delete this</button>
+
+        <div id="pick-delete-alert" class="alert alert-error" >
+          <strong>Are you sure?</strong>
+          <form action="/[% id %]/[% head_sha %]/-/delete" method="post" class="">
+            <input class="btn-danger btn" type="submit" value="YES"></input>
+          </form>
+          <button id="pick-delete-btn-no" class="btn">NO</button>
+        </div>
+        <script>
+        $(function() {
+            var deleteAlert = $('#pick-delete-alert');
+            deleteAlert.hide();
+
+            $('#pick-delete-btn').click(function() {
+                deleteAlert.toggle("fast");
+            });
+            $('#pick-delete-btn-no').click(function() {
+                deleteAlert.hide("fast");
+            });
+        });
+        </script>
+      </div>
+    [% END %]
   </div>
 </div>
 

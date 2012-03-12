@@ -4,11 +4,13 @@ use warnings;
 
 use parent qw(Guita::Mapper);
 
-use List::Util qw(reduce);
 use Guita::Git;
 use Guita::Model::Git::Diff;
 use Guita::Model::Git::Object::Blob;
 use Guita::Model::Git::Object::Tree;
+
+use List::Util qw(reduce);
+use Encode;
 
 sub git {
     my ($self) = @_;
@@ -88,7 +90,7 @@ sub blob_with_contents {
     my ($self, $objectish, $args) = @_;
     my $blob = $self->blob($objectish, $args);
 
-    $blob->{contents} = $self->cat_file($objectish);
+    $blob->{contents} = decode_utf8($self->cat_file($objectish));
     $blob;
 }
 
