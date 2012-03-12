@@ -7,7 +7,6 @@ use lib glob 'modules/*/lib';
 use Path::Class;
 use Plack::Builder;
 use File::Spec;
-use Cache::LRU;
 
 use Guita;
 use Guita::Config ();
@@ -22,7 +21,6 @@ builder {
 
     enable "Plack::Middleware::Runtime";
     enable "Plack::Middleware::StaticShared",
-    # cache => Cache::LRU->new(size => 10),
         base => './static/',
         binds => [
             {
