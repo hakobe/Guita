@@ -16,11 +16,10 @@ use Digest::SHA1 qw(sha1_hex);
 
 sub default {
     my ($self, $c) = @_;
-    my $github_config = config->github_config;
 
     my $uri = URI->new('https://github.com/login/oauth/authorize');
     $uri->query_form(
-        client_id    => $github_config->{client_id},
+        client_id    => config->param('github_client_id'),
     );
 
     $c->redirect($uri->as_string);
@@ -35,8 +34,8 @@ sub callback {
     my $token_res = $ua->request(POST(
         'https://github.com/login/oauth/access_token', 
         [
-            client_id     => config->github_config->{client_id},
-            client_secret => config->github_config->{secret},
+            client_id     => config->param('github_client_id'),
+            client_secret => config->param('github_client_secret'),
             code          => scalar($c->req->param('code')),
         ],
     ));
@@ -53,7 +52,7 @@ sub callback {
     $c->throw(code => 400, message => 'Bad Request') if !($user_json && $user_json->{id});
 
     my $sk = sha1_hex(
-        join('-', 'salt', config->github_config->{session_key_salt}, $user_json->{id}, time())
+        join('-', 'salt', config->param('session_key_salt'), $user_json->{id}, time())
     );
     my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
     my $user = $dbi_mapper->user_from_github_id($user_json->{id});

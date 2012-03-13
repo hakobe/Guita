@@ -201,8 +201,6 @@ sub pick {
 
 sub picks {
     my ($self, $args) = @_;
-    use Data::Dumper;
-    warn Dumper($args);
     $self->array(
         db    => 'guita',
         class => 'Guita::Model::Pick',

@@ -9,8 +9,7 @@ use Plack::Runner;
 
 my $runner = Plack::Runner->new;
 $runner->parse_options(
-    '--server', 'Starlet',
-    '--port', 3000,
+    '--port', 3006,
     '--Reload', join(',', glob('modules/*/lib'), 'lib'),
     '--app', 'script/app.psgi',
     @ARGV,

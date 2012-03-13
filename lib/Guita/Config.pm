@@ -3,28 +3,34 @@ package Guita::Config;
 use utf8;
 use strict;
 use warnings;
+use v5.14;
 
-use Config::ENV 'GUITA_ENV', export => 'config';
+use Exporter::Lite;
+our @EXPORT = qw(config);
 use Path::Class;
 
+sub new {
+    my ($class) = @_;
+    my $config = do $class->root->file('config.pl')->stringify;
+    my $self = bless {
+        config => $config,
+    }, $class;
+    $self;
+}
+
+sub config {
+    state $instance = __PACKAGE__->new;
+}
+
+sub param {
+    my ($self, $key) = @_;
+    $self->{config}->{$key};
+}
+
 sub root {
-    my ($self) = @_;
-    $self->param('root');
+    my ($class) = @_;
+    state $root = file(__FILE__)->parent->parent->parent->absolute,
 }
 
-sub github_config {
-    my ($self) = @_;
-    do $self->root->file('config.pl')->stringify;
-}
-
-common +{
-    root     => file(__FILE__)->parent->parent->parent->absolute,
-    url_base => 'http://localhost:3005',
-};
-
-config default => {
-    repository_base => file(__FILE__)->parent->parent->parent->subdir('repos')->absolute,
-    dsn_guita       => 'dbi:mysql:dbname=guita;host=localhost',
-};
 
 1;

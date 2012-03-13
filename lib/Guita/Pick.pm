@@ -32,7 +32,7 @@ sub create {
             user_id     => $c->user->uuid,
             description => ($c->req->string_param('description') || ''),
         });
-        my $work_tree = config->param('repository_base')->subdir($uuid);
+        my $work_tree = dir(config->param('repository_base'))->subdir($uuid);
         $work_tree->mkpath;
         Guita::Git->run(init => $work_tree->stringify);
 
@@ -60,8 +60,7 @@ sub edit {
     my ($class, $c) = @_;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
-
-    my $work_tree = config->param('repository_base')->subdir($c->id);
+    my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
     my $git_mapper = Guita::Mapper::Git->new->with(
         Guita::Git->new(work_tree => $work_tree->stringify)
     );
@@ -157,7 +156,7 @@ sub pick {
 
     my $git_mapper;
     try {
-        my $work_tree = config->param('repository_base')->subdir($c->id);
+        my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
         $git_mapper = Guita::Mapper::Git->new->with(
             Guita::Git->new(work_tree => $work_tree->stringify)
         );
@@ -203,7 +202,7 @@ sub raw {
 
     my $git_mapper;
     try {
-        my $work_tree = config->param('repository_base')->subdir($c->id);
+        my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
         $git_mapper = Guita::Mapper::Git->new->with(
             Guita::Git->new(work_tree => $work_tree->stringify)
         );
@@ -233,7 +232,7 @@ sub picks {
     });
     my $recents = [ map { 
         my $pick = $_;
-        my $work_tree = config->param('repository_base')->subdir($pick->uuid);
+        my $work_tree = dir(config->param('repository_base'))->subdir($pick->uuid);
         my $git_mapper = Guita::Mapper::Git->new->with(
             Guita::Git->new(work_tree => $work_tree->stringify)
         );
