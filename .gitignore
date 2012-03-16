@@ -1,2 +1,9 @@
-repos
-config.pl
+/repos
+/config.pl
+/META.yml
+/MYMETA.json
+/MYMETA.yml
+/Makefile
+/inc/
+/local/
+/.carton

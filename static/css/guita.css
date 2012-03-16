@@ -2,6 +2,10 @@
     padding-top: 55px;
 }
 
+.brand {
+    font-family: 'Bigshot One', cursive;
+}
+
 h1 {
     font-size: 24px;
     padding-bottom: 10px;
@@ -83,6 +87,10 @@ h2 {
     padding-top: 20px;
 }
 
+#pick-info h1 {
+    padding-bottom: 0;
+}
+
 #pick-info button {
     position: relative;
     top: -3px;
@@ -90,6 +98,20 @@ h2 {
 
 #pick-info .pick-description {
     font-size: 16px;
+}
+
+#pick-info .pick-clone-command {
+    padding-top: 5px;
+}
+
+#pick-info .pick-clone-command code {
+    color: #a9a9a9;
+    background: none;
+    border: none;
+}
+
+#pick-info .pick-clone-command i {
+    margin: 1px;
 }
 
 #pick-delete-alert {
@@ -106,4 +128,8 @@ h2 {
 
 #pick-delete-alert form input {
     margin: 0 auto;
+}
+
+.log {
+    padding-top: 7px;
 }

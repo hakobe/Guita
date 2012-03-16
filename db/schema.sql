@@ -5,6 +5,7 @@ CREATE TABLE `pick` (
     `created`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     KEY `user` (`user_id`, `created`),
+    KEY `created` (`created`),
     PRIMARY KEY (`uuid`)
 );
 

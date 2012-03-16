@@ -226,4 +226,9 @@ sub ls_tree {
     return $results;
 }
 
+sub config {
+    my $self = shift;
+    $self->git->run('config', @_);
+}
+
 1;

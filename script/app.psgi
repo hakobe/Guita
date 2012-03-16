@@ -16,7 +16,7 @@ use Plack::Middleware::StaticShared;
 builder {
     enable "Plack::Middleware::ReverseProxy";
     enable "Plack::Middleware::Static",
-    path => qr{^/(images|js|css)/},
+    path => qr{^/(img|js|css)/},
     root => Guita::Config->root->subdir('static');
 
     enable "Plack::Middleware::Runtime";

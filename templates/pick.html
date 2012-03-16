@@ -11,6 +11,9 @@
     <div class="pick-description">
       [% pick.description %]
     </div>
+    <div class="pick-clone-command">
+      <i class="icon-ok-sign"></i><code>git clone [% repository_url %] [% pick.uuid %]</code>
+    </div>
     <!--
     <dl>
       <dt>Created</dt>
@@ -47,6 +50,7 @@
       [% FOR log IN logs %]
         <li class="log">
           <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span><br>
+          <span class="commiter">[% log.author_name %]</span><br>
           <span class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</span>
         </li>
       [% END %]

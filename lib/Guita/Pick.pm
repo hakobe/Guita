@@ -37,10 +37,14 @@ sub create {
         Guita::Git->run(init => $work_tree->stringify);
 
         my $git_mapper = Guita::Mapper::Git->new->with(Guita::Git->new(work_tree => $work_tree->stringify));
+        $git_mapper->config(qw(receive.denyCurrentBranch ignore));
+
         # textareaの内容をファイルに書きだして
         my $file = $work_tree->file($filename);
         my $fh = $file->openw;
-        print $fh scalar($c->req->string_param('code'));
+        my $code = scalar($c->req->string_param('code'));
+        $code =~ s/\r\n/\n/g;
+        print $fh $code;
         close $fh;
 
         # add して
@@ -103,6 +107,7 @@ sub edit {
 
         my $name_codes = each_array(@names, @codes);
 
+        $git_mapper->git->run(qw(reset --hard));
         while (my ($name, $code) = $name_codes->()) {
             # textareaの内容をファイルに書きだして
             my $filename = $name || 'gitfile1';
@@ -110,6 +115,7 @@ sub edit {
 
             my $file = $work_tree->file($filename);
             my $fh = $file->openw;
+            $code =~ s/\r\n/\n/g;
             print $fh $code;
             close $fh;
 
@@ -156,9 +162,10 @@ sub pick {
 
     my $git_mapper;
     try {
-        my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
         $git_mapper = Guita::Mapper::Git->new->with(
-            Guita::Git->new(work_tree => $work_tree->stringify)
+            Guita::Git->new(
+                work_tree => dir(config->param('repository_base'))->subdir($c->id),
+            )
         );
     };
     $c->throw(code => 404, message => 'Not Found') unless $git_mapper;
@@ -178,14 +185,15 @@ sub pick {
     } } @{ $tree->blobs_list } ];
 
     $c->html('pick.html', {
-        user     => $c->user,
-        author   => $author,
-        id       => $c->id,
-        sha      => $sha,
-        head_sha => $logs->[0]->objectish,
-        pick     => $pick,
-        files    => $files,
-        logs     => $logs,
+        user            => $c->user,
+        author          => $author,
+        id              => $c->id,
+        sha             => $sha,
+        head_sha        => $logs->[0]->objectish,
+        pick            => $pick,
+        files           => $files,
+        logs            => $logs,
+        repository_url  => dir(config->param('repository_base'))->subdir($c->id),
     });
 }
 

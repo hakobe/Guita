@@ -8,6 +8,7 @@ requires 'Plack::Middleware::StaticShared';
 requires 'Plack::Middleware::ReverseProxy';
 requires 'Starman';
 
+requires 'parent';
 requires 'DBI';
 requires 'DBD::mysql';
 requires 'Path::Class';
@@ -40,6 +41,7 @@ requires 'Digest::SHA1';
 requires 'Data::Dumper';
 requires 'Config::ENV';
 requires 'Router::Simple';
+requires 'Devel::KYTProf';
 
 
 WriteAll;

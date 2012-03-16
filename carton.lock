@@ -6997,6 +6997,64 @@
          },
          "version" : "1.45"
       },
+      "Devel::KYTProf" : {
+         "dist" : "Devel-KYTProf-0.01",
+         "module" : "Devel::KYTProf",
+         "mymeta" : {
+            "abstract" : "Simple profiler",
+            "author" : [
+               "Yasuhiro Onishi <yasuhiro.onishi@gmail.com>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.62, CPAN::Meta::Converter version 2.112150",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Devel-KYTProf",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "6.42",
+                     "Test::More" : "0.94"
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Class::Data::Inheritable" : 0,
+                     "Term::ANSIColor" : 0,
+                     "Time::HiRes" : 0,
+                     "UNIVERSAL::require" : 0
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "0.01"
+         },
+         "name" : "Devel::KYTProf",
+         "pathname" : "O/ON/ONISHI/Devel-KYTProf-0.01.tar.gz",
+         "provides" : {
+            "Devel::KYTProf" : {
+               "file" : "Devel/KYTProf.pm",
+               "version" : "0.01"
+            }
+         },
+         "version" : "0.01"
+      },
       "Devel::StackTrace" : {
          "dist" : "Devel-StackTrace-1.27",
          "module" : "Devel::StackTrace",
@@ -7434,6 +7492,72 @@
             }
          },
          "version" : "0.02"
+      },
+      "Encode::Base58" : {
+         "dist" : "Encode-Base58-0.01",
+         "module" : "Encode::Base58",
+         "mymeta" : {
+            "abstract" : "Base58 encodings (for Flickr short URI)",
+            "author" : [
+               "Tatsuhiko Miyagawa <miyagawa@bulknews.net>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "Module::Install version 0.91, CPAN::Meta::Converter version 2.112621, CPAN::Meta::Converter version 2.112150",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Encode-Base58",
+            "no_index" : {
+               "directory" : [
+                  "inc",
+                  "t",
+                  "xt"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "6.42"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "6.42",
+                     "Filter::Util::Call" : 0,
+                     "Test::More" : 0
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "resources" : {
+               "license" : [
+                  "http://dev.perl.org/licenses/"
+               ],
+               "repository" : {
+                  "type" : "git",
+                  "url" : "git://github.com/miyagawa/Encode-Base58.git"
+               }
+            },
+            "version" : "0.01"
+         },
+         "name" : "Encode::Base58",
+         "pathname" : "M/MI/MIYAGAWA/Encode-Base58-0.01.tar.gz",
+         "provides" : {
+            "Encode::Base58" : {
+               "file" : "Encode/Base58.pm",
+               "version" : "0.01"
+            }
+         },
+         "version" : "0.01"
       },
       "Encode::Locale" : {
          "dist" : "Encode-Locale-1.03",
@@ -9495,6 +9619,70 @@
             }
          },
          "version" : "0.33"
+      },
+      "Math::Base36" : {
+         "dist" : "Math-Base36-0.09",
+         "module" : "Math::Base36",
+         "mymeta" : {
+            "abstract" : "Encoding and decoding of base36 strings",
+            "author" : [
+               "Rune Henssel <perl@henssel.dk>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "Module::Install version 1.00, CPAN::Meta::Converter version 2.112150",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "Math-Base36",
+            "no_index" : {
+               "directory" : [
+                  "inc",
+                  "t"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "6.42",
+                     "Test::More" : 0
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : "6.42"
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Math::BigInt" : "1.60",
+                     "perl" : "5.006"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "resources" : {
+               "license" : [
+                  "http://dev.perl.org/licenses/"
+               ],
+               "repository" : {
+                  "url" : "http://github.com/bricas/math-base36"
+               }
+            },
+            "version" : "0.09"
+         },
+         "name" : "Math::Base36",
+         "pathname" : "B/BR/BRICAS/Math-Base36-0.09.tar.gz",
+         "provides" : {
+            "Math::Base36" : {
+               "file" : "Math/Base36.pm",
+               "version" : "0.09"
+            }
+         },
+         "version" : "0.09"
       },
       "Math::Round" : {
          "dist" : "Math-Round-0.06",
@@ -13930,6 +14118,77 @@
          },
          "version" : "0.11"
       },
+      "UNIVERSAL::require" : {
+         "dist" : "UNIVERSAL-require-0.13",
+         "module" : "UNIVERSAL::require",
+         "mymeta" : {
+            "abstract" : "require() modules from a variable",
+            "author" : [
+               "Michael G Schwern <schwern@pobox.com>"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.50, CPAN::Meta::Converter version 2.112150",
+            "license" : [
+               "perl_5"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "UNIVERSAL-require",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ],
+               "package" : [
+                  "UNIVERSAL"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Test::More" : "0.47"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "resources" : {
+               "bugtracker" : {
+                  "web" : "http://rt.cpan.org/Public/Dist/Display.html?Name=UNIVERSAL-require"
+               },
+               "license" : [
+                  "http://dev.perl.org/licenses/"
+               ],
+               "repository" : {
+                  "url" : "http://svn.schwern.org/repos/CPAN/UNIVERSAL-require/trunk/"
+               }
+            },
+            "version" : "0.13"
+         },
+         "name" : "UNIVERSAL::require",
+         "pathname" : "M/MS/MSCHWERN/UNIVERSAL-require-0.13.tar.gz",
+         "provides" : {
+            "UNIVERSAL" : {
+               "file" : "UNIVERSAL/require.pm"
+            },
+            "UNIVERSAL::require" : {
+               "file" : "UNIVERSAL/require.pm",
+               "version" : "0.13"
+            }
+         },
+         "version" : "0.13"
+      },
       "URI" : {
          "dist" : "URI-1.59",
          "module" : "URI::Escape",
@@ -14442,6 +14701,60 @@
             }
          },
          "version" : "3.4"
+      },
+      "parent" : {
+         "dist" : "parent-0.225",
+         "module" : "parent",
+         "mymeta" : {
+            "abstract" : "unknown",
+            "author" : [
+               "unknown"
+            ],
+            "dynamic_config" : 0,
+            "generated_by" : "ExtUtils::MakeMaker version 6.50, CPAN::Meta::Converter version 2.112621, CPAN::Meta::Converter version 2.112150",
+            "license" : [
+               "unknown"
+            ],
+            "meta-spec" : {
+               "url" : "http://search.cpan.org/perldoc?CPAN::Meta::Spec",
+               "version" : "2"
+            },
+            "name" : "parent",
+            "no_index" : {
+               "directory" : [
+                  "t",
+                  "inc"
+               ]
+            },
+            "prereqs" : {
+               "build" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "configure" : {
+                  "requires" : {
+                     "ExtUtils::MakeMaker" : 0
+                  }
+               },
+               "runtime" : {
+                  "requires" : {
+                     "Test::More" : "0.4"
+                  }
+               }
+            },
+            "release_status" : "stable",
+            "version" : "0.225"
+         },
+         "name" : "parent",
+         "pathname" : "C/CO/CORION/parent-0.225.tar.gz",
+         "provides" : {
+            "parent" : {
+               "file" : "parent.pm",
+               "version" : "0.225"
+            }
+         },
+         "version" : "0.225"
       }
    },
    "version" : "0.9"
