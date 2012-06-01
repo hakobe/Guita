@@ -1,7 +1,3 @@
-use inc::Module::Install;
-name 'Guita';
-version '0.01';
-
 requires 'Plack';
 requires 'Plack::Session';
 requires 'Plack::Middleware::StaticShared';
@@ -42,6 +38,3 @@ requires 'Data::Dumper';
 requires 'Config::ENV';
 requires 'Router::Simple';
 requires 'Devel::KYTProf';
-
-
-WriteAll;
