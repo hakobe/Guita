@@ -11,6 +11,7 @@ use HTTP::Request::Common;
 use URI::Escape qw(uri_escape);
 use JSON::XS;
 use Digest::SHA1 qw(sha1_hex);
+use Path::Class qw(file);
 
 # see http://developer.github.com/v3/oauth/
 
@@ -19,7 +20,8 @@ sub default {
 
     my $uri = URI->new('https://github.com/login/oauth/authorize');
     $uri->query_form(
-        client_id    => config->param('github_client_id'),
+        client_id => config->param('github_client_id'),
+        scope => 'user,public_repo',
     );
 
     $c->redirect($uri->as_string);
@@ -39,17 +41,23 @@ sub callback {
             code          => scalar($c->req->param('code')),
         ],
     ));
-
-    $c->throw(code => 400, message => 'Bad Request') if $token_res->is_error;
+    $c->throw(code => 400, message => 'Bad Request: token') if $token_res->is_error;
 
     my ($access_token) = $token_res->content =~ m/access_token=(.*?)(?:&|$)/xms;
+
+    # user json
     my $user_res = $ua->request(GET(
         'https://api.github.com/user?access_token=' . uri_escape($access_token),
     ));
-    $c->throw(code => 400, message => 'Bad Request') if $user_res->is_error;
-
+    $c->throw(code => 400, message => 'Bad Request: user json') if $user_res->is_error;
     my $user_json = decode_json($user_res->content);
-    $c->throw(code => 400, message => 'Bad Request') if !($user_json && $user_json->{id});
+
+    # user keys json
+    my $user_keys_res = $ua->request(GET(
+        'https://api.github.com/user/keys?access_token=' . uri_escape($access_token),
+    ));
+    $c->throw(code => 400, message => 'Bad Request: user keys json') if $user_keys_res->is_error;
+    my $user_keys_json = decode_json($user_keys_res->content);
 
     my $sk = sha1_hex(
         join('-', 'salt', config->param('session_key_salt'), $user_json->{id}, time())
@@ -58,16 +66,34 @@ sub callback {
     my $user = $dbi_mapper->user_from_github_id($user_json->{id});
     if ($user) {
         $user->sk($sk);
+        my $struct = $user->struct;
+        $struct->{api}->{user}      = $user_json;
+        $struct->{api}->{user_keys} = $user_keys_json;
+        $user->{struct} = encode_json($struct);
         $dbi_mapper->update_user($user);
     }
     else {
-        $dbi_mapper->create_user({
+        my $uuid = $dbi_mapper->create_user({
             github_id => $user_json->{id},
             sk        => $sk,
-            struct    => $user_json,
+            struct    => {
+                api => {
+                    user      => $user_json,
+                    user_keys => $user_keys_json,
+                }
+            },
         });
+        $user = $dbi_mapper->user_from_uuid($uuid);
     }
     $c->res->headers->push_header('Set-Cookie' => "sk=$sk; path=/");
+
+    if (config->param('authorized_keys')) {
+        my $authorized_keys = file(config->param('authorized_keys'))->absolute;
+        my $fh = $authorized_keys->open('w+');
+        if ($fh) {
+            print $fh "\n".$user->ssh_keys;
+        }
+    }
 
     $c->redirect('/');
 }

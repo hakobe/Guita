@@ -38,7 +38,17 @@ sub struct {
 
 sub name {
     my ($self) = @_;
-    $self->struct->{login};
+    $self->struct->{api}->{user}->{login};
+}
+
+sub avatar_url {
+    my ($self) = @_;
+    $self->struct->{api}->{user}->{avatar_url};
+}
+
+sub ssh_keys {
+    my ($self) = @_;
+    join "\n", map { $_->{key} } @{ $self->struct->{api}->{user_keys} };
 }
 
 1;
