@@ -13,19 +13,19 @@ use Guita::Pick;
 route "/"                => "Guita::Pick default";
 route "/picks"           => "Guita::Pick picks";
 route "/picks/-/create"  => "Guita::Pick create";
-route "/picks/:username" => "Guita::Pick default";
 route "/mine"            => "Guita::Pick mine";
 
 route "/auth"          => "Guita::Auth";
 route "/auth/callback" => "Guita::Auth callback";
 route "/auth/logout"   => "Guita::Auth logout";
 
-route "/:id"                => "Guita::Pick pick";
-route "/:id/:sha"           => "Guita::Pick pick";
-route "/:id/:sha/-/edit"    => "Guita::Pick edit";
-route "/:id/:sha/-/delete"  => "Guita::Pick delete";
-route "/:id/:sha/:filename" => "Guita::Pick raw";
+route "/{id:[0-9]+}"                => "Guita::Pick pick";
+route "/{id:[0-9]+}/:sha"           => "Guita::Pick pick";
+route "/{id:[0-9]+}/:sha/-/edit"    => "Guita::Pick edit";
+route "/{id:[0-9]+}/:sha/-/delete"  => "Guita::Pick delete";
+route "/{id:[0-9]+}/:sha/:filename" => "Guita::Pick raw";
 
+route "/:username"       => "Guita::Pick picks";
 
 1;
 __END__

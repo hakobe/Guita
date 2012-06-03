@@ -132,6 +132,17 @@ sub user_from_uuid {
     );
 }
 
+sub user_from_name {
+    my ($self, $name) = @_;
+
+    $self->single(
+        db => 'guita',
+        class => 'Guita::Model::User',
+        sql => 'SELECT * FROM user WHERE name = :name',
+        bind => { name => $name },
+    );
+}
+
 sub create_pick {
     my ($self, $args) = @_;
 
@@ -210,6 +221,20 @@ sub picks {
         bind => {
             offset => $args->{offset} || 0,
             limit  => $args->{limit}  || 5,
+        },
+    )
+}
+
+sub picks_for_user {
+    my ($self, $user, $args) = @_;
+    $self->array(
+        db    => 'guita',
+        class => 'Guita::Model::Pick',
+        sql   => 'SELECT * FROM pick WHERE user_id = :user_id ORDER BY created desc LIMIT :offset,:limit',
+        bind => {
+            user_id => $user->uuid,
+            offset  => $args->{offset} || 0,
+            limit   => $args->{limit}  || 5,
         },
     )
 }

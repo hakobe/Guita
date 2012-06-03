@@ -159,6 +159,11 @@ sub filename {
     scalar $self->req->param('filename');
 }
 
+sub username {
+    my ($self) = @_;
+    scalar $self->req->param('username');
+}
+
 1;
 
 __END__

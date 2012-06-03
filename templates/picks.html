@@ -1,4 +1,4 @@
-[% WRAPPER '_wrapper.html' WITH nav = 'picks' %]
+[% WRAPPER '_wrapper.html' WITH nav = author ? '' : 'picks'%]
 
 <!--
 <div class="row">
@@ -8,6 +8,9 @@
 </div>
 -->
 <div class="row">
+  <div class="span10">
+    <h1>[% IF author %][% author.name %][% ELSE %][% END %]</h1>
+  </div>
   <div id="recents" class="span10">
     [% IF recents.size() > 0 %]
       [% FOR recent IN recents %]
@@ -19,8 +22,8 @@
               [% IF !recent.author.is_guest %]
               <span class="avator-img">
                 by 
-                <img src="[% recent.author.avatar_url %]"></img>
-                [% recent.author.name %]
+                <a href="/[% recent.author.name %]"><img src="[% recent.author.avatar_url %]"></img></a>
+                <a href="/[% recent.author.name %]">[% recent.author.name %]</a>
               </span>
             </div>
             [% END %]

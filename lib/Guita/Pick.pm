@@ -13,6 +13,7 @@ use Guita::Pager;
 use Path::Class;
 use Try::Tiny;
 use List::MoreUtils qw(each_array);
+use URI::Escape;
 
 
 sub default {
@@ -236,6 +237,7 @@ sub picks {
         per_page => 5,
         page     => $c->req->number_param('page') || 1,
     });
+    my $author = $dbi_mapper->user_from_name($c->username) if $c->username;
     my $recents = [ map { 
         my $pick = $_;
         my $work_tree = dir(config->param('repository_base'))->subdir($pick->uuid);
@@ -251,10 +253,15 @@ sub picks {
             name   => $blob_with_name->{name},
             blob   => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
         }
-    } @{ $dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit }) } ];
+    } @{ 
+        $author ? $dbi_mapper->picks_for_user($author, {offset => $pager->offset, limit => $pager->limit})
+              : $dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
+              ;
+    } ];
 
     $c->html('picks.html', {
         user    => $c->user,
+        author  => $author,
         recents => $recents,
         pager   => $pager,
     });
@@ -263,6 +270,7 @@ sub picks {
 
 sub mine {
     my ($class, $c) = @_;
+    $c->user ? $c->redirect('/'.uri_escape($c->user->name)) : $c->redirect('/picks');
 }
 
 1;

@@ -1,15 +1,15 @@
 [% WRAPPER '_wrapper.html' WITH nav = 'picks' %]
 
 <div class="row">
-  <div id="pick-info" class="span8">
+  <div id="pick-info" class="span10">
     <h1 class="pick-description">
-      [% pick.description %]
+      [% pick.uuid || pick.description %]
       [% IF sha == head_sha %]
         <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
       [% END %]
     </h1>
     <div class="pick-clone-command">
-      <i class="icon-ok-sign"></i><code>git clone [% repository_url %] [% pick.uuid %]</code>
+      <i class="icon-ok-sign"></i><code>git clone [% repository_url %] guita-[% pick.uuid %]</code>
     </div>
     <!--
     <dl>
