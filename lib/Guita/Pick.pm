@@ -52,7 +52,7 @@ sub create {
         $git_mapper->add($file->stringify);
 
         # commit
-        $git_mapper->commit('from guita');
+        $git_mapper->commit('edited in guita web form', {author => $c->user});
 
         $c->redirect("/$uuid");
     }
