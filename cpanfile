@@ -2,7 +2,7 @@ requires 'Plack';
 requires 'Plack::Session';
 requires 'Plack::Middleware::StaticShared';
 requires 'Plack::Middleware::ReverseProxy';
-requires 'Starman';
+requires 'Starlet';
 
 requires 'parent';
 requires 'DBI';
