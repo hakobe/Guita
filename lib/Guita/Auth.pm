@@ -92,6 +92,7 @@ sub callback {
         my $fh = $authorized_keys->open('w+');
         if ($fh) {
             print $fh "\n".$user->ssh_keys;
+            close $fh;
         }
     }
 
