@@ -37,7 +37,7 @@
               <ul class="nav">
                 <li class="divider-vertical"></li>
                 <li [% IF nav == 'picks' %]class="active"[% END %]><a href="/picks">Picks</a></li>
-                <li [% IF nav == 'create' %]class="active"[% END %]><a href="/picks/create">Create</a></li>
+                <li [% IF nav == 'create' %]class="active"[% END %]><a href="/picks/-/create">Create</a></li>
               </ul>
               <ul class="nav pull-right">
                 [% IF !user.is_guest %]

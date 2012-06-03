@@ -10,10 +10,11 @@ our @EXPORT = qw(config);
 
 use Guita::Pick;
 
-route "/"              => "Guita::Pick default";
-route "/picks"         => "Guita::Pick picks";
-route "/picks/create"  => "Guita::Pick create";
-route "/mine"          => "Guita::Pick mine";
+route "/"                => "Guita::Pick default";
+route "/picks"           => "Guita::Pick picks";
+route "/picks/-/create"  => "Guita::Pick create";
+route "/picks/:username" => "Guita::Pick default";
+route "/mine"            => "Guita::Pick mine";
 
 route "/auth"          => "Guita::Auth";
 route "/auth/callback" => "Guita::Auth callback";
