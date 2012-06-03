@@ -103,10 +103,10 @@ sub edit {
         my @names = $c->req->string_param('name');
         my @codes = $c->req->string_param('code');
 
-        my $name_codes = each_array(@names, @codes);
+        my $name_generator = each_array(@names, @codes);
 
-        $git_mapper->git->run(qw(reset --hard));
-        while (my ($name, $code) = $name_codes->()) {
+        $git_mapper->git->run(qw(reset --hard)); # 不要?
+        while (my ($name, $code) = $name_generator->()) {
             # textareaの内容をファイルに書きだして
             my $filename = $name || 'gitfile1';
             $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
@@ -121,7 +121,7 @@ sub edit {
             $git_mapper->add($file->stringify);
         }
         # 最後にcommit
-        $git_mapper->commit('from pick');
+        $git_mapper->commit('edited in guita web form', {author => $c->user});
 
         $c->redirect(sprintf("/%s", $c->id));
     }

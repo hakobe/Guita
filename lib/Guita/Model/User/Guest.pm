@@ -26,4 +26,10 @@ sub struct { +{} }
 
 sub name { 'Guest' }
 
+sub email { 'guita@douzemille.net' }
+
+sub avatar_url { '' }
+
+sub ssh_keys { '' }
+
 1;

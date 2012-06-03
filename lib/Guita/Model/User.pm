@@ -41,6 +41,11 @@ sub name {
     $self->struct->{api}->{user}->{login};
 }
 
+sub email {
+    my ($self) = @_;
+    $self->struct->{api}->{user}->{email};
+}
+
 sub avatar_url {
     my ($self) = @_;
     $self->struct->{api}->{user}->{avatar_url};

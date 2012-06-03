@@ -24,9 +24,16 @@ sub add {
 }
 
 sub commit {
-    my ($self, $comment) = @_;
+    my ($self, $comment, $args) = @_;
 
-    $self->git->run(commit => '-m', $comment);
+    my @params = ('-m', $comment);
+    if ($args && $args->{author}) {
+        push @params, (
+            sprintf(q[--author='%s <hoge%s>'], $args->{author}->name, $args->{author}->email),
+        );
+    }
+
+    $self->git->run(commit => @params);
 }
 
 sub tree {
