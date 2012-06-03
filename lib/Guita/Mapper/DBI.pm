@@ -81,6 +81,7 @@ sub update_user {
         q[
             UPDATE user
             SET
+                name       = :name,
                 sk         = :sk,
                 sk_expires = :sk_expires,
                 struct     = :struct
@@ -88,6 +89,7 @@ sub update_user {
                 uuid       = :uuid
         ],
         {
+            name       => $user->name,
             uuid       => $user->uuid,
             sk         => $user->sk,
             sk_expires => now->add( days => 14 ),

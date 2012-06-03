@@ -70,11 +70,13 @@ sub callback {
         $struct->{api}->{user}      = $user_json;
         $struct->{api}->{user_keys} = $user_keys_json;
         $user->{struct} = encode_json($struct);
+        $user->name( $user_json->{login} );
         $dbi_mapper->update_user($user);
     }
     else {
         my $uuid = $dbi_mapper->create_user({
             github_id => $user_json->{id},
+            name      => $user_json->{login},
             sk        => $sk,
             struct    => {
                 api => {

@@ -14,6 +14,7 @@ use Class::Accessor::Lite (
     rw => [qw(
         uuid
         github_id
+        name
         sk
     )],
 );
@@ -34,11 +35,6 @@ sub is_expired {
 sub struct {
     my ($self) = @_;
     decode_json($self->{struct});
-}
-
-sub name {
-    my ($self) = @_;
-    $self->struct->{api}->{user}->{login};
 }
 
 sub email {
