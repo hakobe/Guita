@@ -192,7 +192,7 @@ sub pick {
         pick            => $pick,
         files           => $files,
         logs            => $logs,
-        repository_url  => dir(config->param('repository_base'))->subdir($c->id),
+        repository_url  => dir(config->param('remote_repository_base'))->subdir($c->id),
     });
 }
 
