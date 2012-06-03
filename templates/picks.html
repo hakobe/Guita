@@ -13,18 +13,15 @@
       [% FOR recent IN recents %]
         <div class="pick-show">
           <div class="pick-info-short">
-            <a href="/[% recent.pick.uuid %]">Pick : [% recent.pick.uuid %]</a>
-            [% recent.pick.created %]
-            [% IF !recent.author.is_guest %]
-            <span class="avator-img">
-              by 
-              <img src="[% recent.author.struct.avatar_url %]"></img>
-              [% recent.author.name %]
-            </span>
-            [% END %]
-            [% IF recent.pick.description %]
-            <div class="pick-description">
-              [% strip(recent.pick.description, 140) %]
+            <a href="/[% recent.pick.uuid %]">[% strip(recent.pick.description, 140) || recent.pick.uuid %]</a>
+            <div class="pick-info-short-sub">
+              [% recent.pick.created %]
+              [% IF !recent.author.is_guest %]
+              <span class="avator-img">
+                by 
+                <img src="[% recent.author.avatar_url %]"></img>
+                [% recent.author.name %]
+              </span>
             </div>
             [% END %]
           </div>

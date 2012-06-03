@@ -2,15 +2,12 @@
 
 <div class="row">
   <div id="pick-info" class="span8">
-    <h1>
-      Pick: [% pick.uuid %] 
-      [% IF sha == head_sha && !user.is_guest && user.uuid == author.uuid %]
+    <h1 class="pick-description">
+      [% pick.description %]
+      [% IF sha == head_sha %]
         <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
       [% END %]
     </h1>
-    <div class="pick-description">
-      [% pick.description %]
-    </div>
     <div class="pick-clone-command">
       <i class="icon-ok-sign"></i><code>git clone [% repository_url %] [% pick.uuid %]</code>
     </div>

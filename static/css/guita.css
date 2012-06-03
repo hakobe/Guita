@@ -67,13 +67,17 @@ h2 {
 }
 
 .pick-show .pick-info-short {
-    padding: 5px;
+    padding: 5px 0;
     font-size: 16px;
 }
 
 .pick-show .pick-info-short .pick-description {
     margin-top: 5px;
     font-size: 14px;
+}
+
+.pick-show .pick-info-short-sub {
+    font-size: 12px;
 }
 
 .pick-info-short .avator-img img {
@@ -97,7 +101,7 @@ h2 {
 }
 
 #pick-info .pick-description {
-    font-size: 16px;
+    font-size: 24px;
 }
 
 #pick-info .pick-clone-command {
