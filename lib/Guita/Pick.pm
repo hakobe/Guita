@@ -76,8 +76,6 @@ sub edit {
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
     my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
-    $c->throw(code => 403, message => 'Forbidden') 
-        if $author->is_guest || $c->user->uuid ne $author->uuid;
 
     if ($c->req->method eq 'GET') {
 
