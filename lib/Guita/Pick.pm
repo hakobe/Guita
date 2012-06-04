@@ -14,6 +14,7 @@ use Path::Class;
 use Try::Tiny;
 use List::MoreUtils qw(each_array);
 use URI::Escape;
+use Text::Xslate;
 
 
 sub default {
@@ -191,7 +192,7 @@ sub pick {
         pick            => $pick,
         files           => $files,
         logs            => $logs,
-        repository_url  => dir(config->param('remote_repository_base'))->subdir($c->id),
+        repository_url  => Text::Xslate::mark_raw(dir(config->param('remote_repository_base'))->subdir($c->id)),
     });
 }
 
