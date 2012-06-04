@@ -3,7 +3,7 @@
 <div class="row">
   <div id="pick-info" class="span10">
     <h1 class="pick-description">
-      [% pick.uuid || pick.description %]
+      [% pick.description || pick.uuid %]
       [% IF sha == head_sha %]
         <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
       [% END %]
