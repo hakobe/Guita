@@ -10,7 +10,7 @@
     [%- JS = [] %]
     [%- JS.push("//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
     [%- JS.push("//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
-    [%- JS.push("//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.js") %]
+    [%- JS.push("/js/prettify.js") %]
     [%- JS.push("/js/bootstrap.js") %]
 
     [%- FOR path IN JS %]
@@ -23,7 +23,7 @@
 
     <!-- <link rel="stylesheet" href="/js/highlight/styles/zenburn.css" type="text/css" media="all" /> -->
     <link rel="stylesheet" href="/css/bootstrap.css" type="text/css" media="all" />
-    <link rel="stylesheet" href="//twitter.github.com/bootstrap/assets/js/google-code-prettify/prettify.css" type="text/css" media="all" />[% # XXX %]
+    <link rel="stylesheet" href="/css/prettify.css" type="text/css" media="all" />[% # XXX %]
     <link rel="stylesheet" href="/css/guita.css" type="text/css" media="all" />
 
   </head>
