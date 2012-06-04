@@ -12,6 +12,8 @@ use URI::Escape qw(uri_escape);
 use JSON::XS;
 use Digest::SHA1 qw(sha1_hex);
 use Path::Class qw(file);
+use DateTime;
+use DateTime::Format::HTTP;
 
 # see http://developer.github.com/v3/oauth/
 
@@ -87,7 +89,11 @@ sub callback {
         });
         $user = $dbi_mapper->user_from_uuid($uuid);
     }
-    $c->res->headers->push_header('Set-Cookie' => "sk=$sk; path=/");
+    my $expires = DateTime::Format::HTTP->format_datetime(
+        DateTime->now(time_zone => 'local')->add( days => 7 )
+    );
+    my $domain = $c->req->uri->host;
+    $c->res->headers->push_header('Set-Cookie' => qq[sk=$sk; path=/; expires=$expires; domain=$domain;]);
 
     if (config->param('authorized_keys')) {
         my $authorized_keys = file(config->param('authorized_keys'))->absolute;
