@@ -57,6 +57,7 @@ sub create_user {
             SET
                 uuid       = :uuid,
                 github_id  = :github_id,
+                name       = :name,
                 sk         = :sk,
                 sk_expires = :sk_expires,
                 struct     = :struct
@@ -64,6 +65,7 @@ sub create_user {
         {
             uuid       => $uuid,
             github_id  => $args->{github_id},
+            name       => $args->{name},
             sk         => $args->{sk},
             sk_expires => now->add( days => 14 ),
             struct     => encode_json($args->{struct}),
