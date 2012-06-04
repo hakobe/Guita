@@ -2,10 +2,12 @@ CREATE TABLE `pick` (
     `uuid`        BIGINT UNSIGNED NOT NULL,
     `user_id`     BIGINT UNSIGNED NOT NULL,
     `description` TEXT NOT NULL DEFAULT '',
-    `created`     TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `created`     TIMESTAMP NOT NULL DEFAULT '0000-00-00 00:00:00',
+    `modified`    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
     KEY `user` (`user_id`, `created`),
     KEY `created` (`created`),
+    KEY `modified` (`modified`),
     PRIMARY KEY (`uuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 

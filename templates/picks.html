@@ -18,7 +18,7 @@
           <div class="pick-info-short">
             <a href="/[% recent.pick.uuid %]">[% strip(recent.pick.description, 140) || recent.pick.uuid %]</a>
             <div class="pick-info-short-sub">
-              [% recent.pick.created %]
+              [% recent.pick.modified %]
               [% IF !recent.author.is_guest %]
               <span class="avator-img">
                 by 

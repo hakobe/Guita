@@ -94,10 +94,9 @@ sub edit {
         });
     }
     elsif ($c->req->method eq 'POST') {
-        if ($c->req->string_param('description') ne $pick->description) {
-            $pick->description($c->req->string_param('description') || '');
-            $dbi_mapper->update_pick($pick);
-        }
+        # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
+        $pick->description($c->req->string_param('description') || '');
+        $dbi_mapper->update_pick($pick);
 
         # TODO 変更対象のファイルをロックする
         # TODO ファイルがなくなったら削除する
