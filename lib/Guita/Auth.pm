@@ -93,7 +93,7 @@ sub callback {
         DateTime->now(time_zone => 'local')->add( days => 7 )
     );
     my $domain = $c->req->uri->host;
-    $c->res->headers->push_header('Set-Cookie' => qq[sk=$sk; path=/; expires=$expires; domain=$domain;]);
+    $c->res->headers->header('Set-Cookie' => qq[sk=$sk; path=/; expires=$expires; domain=$domain;]);
 
     if (config->param('authorized_keys')) {
         my $authorized_keys = file(config->param('authorized_keys'))->absolute;
