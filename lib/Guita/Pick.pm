@@ -7,7 +7,7 @@ use Guita::Git;
 use Guita::Mapper::DBI;
 use Guita::Mapper::Git;
 use Guita::Model::User::Guest;
-use Guita::Utils qw(is_valid_filename);
+use Guita::Utils qw(is_valid_filename now);
 use Guita::Pager;
 
 use Path::Class;
