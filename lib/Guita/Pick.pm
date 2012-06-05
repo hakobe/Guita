@@ -239,8 +239,7 @@ sub star_count {
     my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
 
     if ($c->req->method eq 'POST') {
-        # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
-        $pick->star_count( $pick->star_count + 1 );
+        $pick->star_count( $pick->star_count + ($c->req->param('count') || 1) );
         $dbi_mapper->update_pick($pick);
     }
     $c->json({

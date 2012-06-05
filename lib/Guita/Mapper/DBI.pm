@@ -180,6 +180,7 @@ sub update_pick {
             UPDATE pick
             SET
                 description = :description,
+                star_count  = :star_count,
                 modified    = :modified
             WHERE
                 uuid = :uuid
@@ -187,6 +188,7 @@ sub update_pick {
         {
             uuid        => $pick->uuid,
             description => encode_utf8($pick->description),
+            star_count  => $pick->star_count,
             modified    => $pick->modified,
         },
     );
@@ -228,7 +230,7 @@ sub picks {
         sql   => 'SELECT * FROM pick ORDER BY modified desc LIMIT :offset,:limit',
         bind => {
             offset => $args->{offset} || 0,
-            limit  => $args->{limit}  || 5,
+            limit  => $args->{limit}  || 10,
         },
     )
 }
@@ -242,7 +244,7 @@ sub picks_for_user {
         bind => {
             user_id => $user->uuid,
             offset  => $args->{offset} || 0,
-            limit   => $args->{limit}  || 5,
+            limit   => $args->{limit}  || 10,
         },
     )
 }

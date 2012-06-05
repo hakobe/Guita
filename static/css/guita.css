@@ -118,6 +118,15 @@ h2 {
     margin: 1px;
 }
 
+.pick-star-count {
+    white-space: nowrap;
+}
+
+.pick-star-count .pick-star-container {
+    font-size: 12px;
+    color: #38a1db;
+}
+
 #pick-delete-alert {
     margin-top: 10px;
     padding: 10px;
