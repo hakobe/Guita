@@ -138,7 +138,7 @@ sub user {
 
     $self->{_user} ||= do {
         my $dbi_mapper = Guita::Mapper::DBI->new->with($self->dbh('guita'));
-        my $sk = $self->req->cookies->{sk};
+        my $sk = $self->req->cookies->{csk};
         my $user = $sk && $dbi_mapper->user_from_sk($sk);
         $user || Guita::Model::User::Guest->new;
     };
