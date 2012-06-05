@@ -5,7 +5,7 @@ use strict;
 use warnings;
 
 use Exporter::Lite;
-our @EXPORT = qw(html text redirect render);
+our @EXPORT = qw(html json text redirect render);
 
 use Guita::Config;
 
@@ -14,6 +14,7 @@ use Encode;
 use Data::Dumper;
 use HTML::Trim;
 use DateTime;
+use JSON::XS;
 
 my $XSLATE = Text::Xslate->new(
     syntax => 'TTerse',
@@ -86,6 +87,13 @@ sub text {
 
     $self->res->content_type('text/plain; charset=utf-8');
     $self->res->content(encode_utf8 $content);
+}
+
+sub json {
+    my ($self, $json) = @_;
+
+    $self->res->content_type('text/plain; charset=utf-8');
+    $self->res->content(JSON::XS->new->utf8->encode($json));
 }
 
 sub redirect {

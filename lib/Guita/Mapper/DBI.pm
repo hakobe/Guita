@@ -187,7 +187,7 @@ sub update_pick {
         {
             uuid        => $pick->uuid,
             description => encode_utf8($pick->description),
-            modified    => now(),
+            modified    => $pick->modified,
         },
     );
     $self->dbh->prepare_cached($sql)->execute(@$bind);

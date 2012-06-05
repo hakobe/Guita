@@ -97,6 +97,7 @@ sub edit {
     elsif ($c->req->method eq 'POST') {
         # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
         $pick->description($c->req->string_param('description') || '');
+        $pick->modified(now());
         $dbi_mapper->update_pick($pick);
 
         # TODO 変更対象のファイルをロックする
@@ -226,6 +227,27 @@ sub raw {
     my $blob = $git_mapper->blob_with_contents($tree->blobs->{$c->filename}->objectish);
 
     $c->text($blob->contents);
+}
+
+sub star_count {
+    my ($class, $c) = @_;
+
+    $c->throw(code => 404, message => 'Not Found') unless $c->id;
+
+    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $pick = $dbi_mapper->pick($c->id);
+    $c->throw(code => 404, message => 'Not Found') unless $pick;
+
+    my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+
+    if ($c->req->method eq 'POST') {
+        # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
+        $pick->star_count( $pick->star_count + 1 );
+        $dbi_mapper->update_pick($pick);
+    }
+    $c->json({
+        star_count => $pick->star_count,
+    });
 }
 
 sub picks {

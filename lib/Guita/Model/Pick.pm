@@ -9,9 +9,10 @@ use Encode;
 
 use Class::Accessor::Lite (
     new => 1,
-    ro => [qw(
+    rw => [qw(
         uuid
         user_id
+        star_count
     )],
 );
 
@@ -25,7 +26,10 @@ sub created {
 }
 
 sub modified {
-    my ($self) = @_;
+    my ($self, $modified) = @_;
+    if ($modified) {
+        $self->{modified} = DateTime::Format::MySQL->format_datetime($modified);
+    }
     my $ret;
     eval {
         $ret = DateTime::Format::MySQL->parse_datetime($self->{modified})->set_time_zone('local');
