@@ -253,7 +253,7 @@ sub picks {
     my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
     my $pager = Guita::Pager->new({
         count    => $dbi_mapper->picks_count,
-        per_page => 5,
+        per_page => 10,
         page     => $c->req->number_param('page') || 1,
     });
     my $author = $dbi_mapper->user_from_name($c->username) if $c->username;
