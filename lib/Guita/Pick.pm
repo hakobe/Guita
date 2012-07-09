@@ -256,6 +256,7 @@ sub picks {
         per_page => 10,
         page     => $c->req->number_param('page') || 1,
     });
+
     my $author = $dbi_mapper->user_from_name($c->username) if $c->username;
     my $recents = [ map { 
         my $pick = $_;
@@ -266,16 +267,16 @@ sub picks {
         my $tree = $git_mapper->tree_with_children('HEAD');
 
         my $blob_with_name = $tree->blobs_list->[0];
-        +{
+        $blob_with_name ? +{
             pick   => $pick,
             author => ($dbi_mapper->user_from_uuid($pick->user_id) || Guita::Model::User::Guest->new),
             name   => $blob_with_name->{name},
             blob   => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
-        }
+        } : ()
     } @{ 
         $author ? $dbi_mapper->picks_for_user($author, {offset => $pager->offset, limit => $pager->limit})
-              : $dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
-              ;
+                : $dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
+                ;
     } ];
 
     $c->html('picks.html', {
