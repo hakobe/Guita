@@ -85,6 +85,29 @@ sub tree_for_path {
     } $tree, (grep { $_ } split(/\//, $path));
 }
 
+# XXX 適切な配置ではない
+sub traverse_tree {
+    my ($self, $objectish, $callback, $path) = @_;
+    return unless $callback;
+    $path ||= '';
+
+    my $tree = $self->tree_with_children($objectish);
+
+    for my $blob_with_name (@{ $tree->blobs_list }) {
+        $callback->(
+            $blob_with_name->{obj},
+            $path ? join('/', $path, $blob_with_name->{name}) : $blob_with_name->{name},
+        );
+    }
+    for my $tree_with_name (@{ $tree->trees_list }) {
+        $self->traverse_tree(
+            $tree_with_name->{obj}->objectish,
+            $callback,
+            $path ? join('/', $path, $tree_with_name->{name}) : $tree_with_name->{name},
+        );
+    }
+}
+
 sub blob {
     my ($self, $objectish) = @_;
 

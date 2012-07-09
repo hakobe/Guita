@@ -171,16 +171,17 @@ sub pick {
     my $logs = $git_mapper->logs(10, 'HEAD');
     my $sha = $c->sha || $logs->[0]->objectish;
 
-    my $tree;
+    my $files = [];
     try {
-        $tree = $git_mapper->tree_with_children($sha);
+        $git_mapper->traverse_tree( $sha, sub {
+            my ($obj, $path) = @_;
+            push @$files, +{
+                name => $path,
+                blob => $git_mapper->blob_with_contents($obj->objectish),
+            };
+        });
     };
-    $c->throw(code => 404, message => 'Not Found') unless $tree;
-
-    my $files = [ map { +{
-        name => $_->{name}, 
-        blob => $git_mapper->blob_with_contents($_->{obj}->objectish),
-    } } @{ $tree->blobs_list } ];
+    $c->throw(code => 404, message => 'Not Found') unless @$files;
 
     $c->html('pick.html', {
         user            => $c->user,
