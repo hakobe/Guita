@@ -4,8 +4,8 @@ use warnings;
 
 use Guita::Config;
 use Guita::Git;
-use Guita::Mapper::DBI;
 use Guita::Mapper::DBI::User;
+use Guita::Mapper::DBI::Pick;
 use Guita::Mapper::Git;
 use Guita::Model::User::Guest;
 use Guita::Utils qw(is_valid_filename now);
@@ -27,9 +27,9 @@ sub create {
         my $filename = $c->req->string_param('name') || 'gitfile1';
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
 
-        my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+        my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
 
-        my $uuid = $dbi_mapper->create_pick({
+        my $uuid = $pick_dbi_mapper->create_pick({
             user_id     => $c->user->uuid,
             description => ($c->req->string_param('description') || ''),
         });
@@ -72,11 +72,12 @@ sub edit {
 
     # HEADを変更するが、同時に変更が起こった場合不整合が起こる
     my $tree = $git_mapper->tree_with_children('HEAD');
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
-    my $pick = $dbi_mapper->pick($c->id);
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
+    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
+    my $pick = $pick_dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+    my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
 
     if ($c->req->method eq 'GET') {
 
@@ -97,7 +98,7 @@ sub edit {
         # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
         $pick->description($c->req->string_param('description') || '');
         $pick->modified(now());
-        $dbi_mapper->update_pick($pick);
+        $pick_dbi_mapper->update_pick($pick);
 
         # TODO 変更対象のファイルをロックする
         # TODO ファイルがなくなったら削除する
@@ -134,14 +135,15 @@ sub delete {
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
     if ($c->req->method eq 'POST') {
-        my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
-        my $pick = $dbi_mapper->pick($c->id);
+        my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
+        my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
+        my $pick = $pick_dbi_mapper->pick($c->id);
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-        my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+        my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
         $c->throw(code => 403, message => 'Forbidden') if $author->is_guest || $c->user->uuid ne $author->uuid;
 
-        $dbi_mapper->delete_pick($pick);
+        $pick_dbi_mapper->delete_pick($pick);
     }
 
     $c->redirect('/picks');
@@ -153,9 +155,9 @@ sub pick {
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
     my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
-    my $pick = $dbi_mapper->pick($c->id);
+    my $pick = $pick_dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
     my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
@@ -205,8 +207,8 @@ sub raw {
     $c->throw(code => 404, message => 'Not Found') unless $c->sha;
     $c->throw(code => 404, message => 'Not Found') unless $c->filename;
 
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
-    my $pick = $dbi_mapper->pick($c->id);
+    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
+    my $pick = $pick_dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
     my $git_mapper;
@@ -235,16 +237,16 @@ sub star_count {
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
     my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
-    my $pick = $dbi_mapper->pick($c->id);
+    my $pick = $pick_dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+    my $author = $pick_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
 
     if ($c->req->method eq 'POST') {
         $pick->star_count( $pick->star_count + ($c->req->param('count') || 1) );
-        $dbi_mapper->update_pick($pick);
+        $pick_dbi_mapper->update_pick($pick);
     }
     $c->json({
         star_count => $pick->star_count,
@@ -254,10 +256,10 @@ sub star_count {
 sub picks {
     my ($class, $c) = @_;
 
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
     my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
     my $pager = Guita::Pager->new({
-        count    => $dbi_mapper->picks_count,
+        count    => $pick_dbi_mapper->picks_count,
         per_page => 10,
         page     => $c->req->number_param('page') || 1,
     });
@@ -279,8 +281,8 @@ sub picks {
             blob   => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
         } : ()
     } @{ 
-        $author ? $dbi_mapper->picks_for_user($author, {offset => $pager->offset, limit => $pager->limit})
-                : $dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
+        $author ? $pick_dbi_mapper->picks_for_user($author, {offset => $pager->offset, limit => $pager->limit})
+                : $pick_dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
                 ;
     } ];
 
