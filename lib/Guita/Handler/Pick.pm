@@ -232,27 +232,6 @@ sub raw {
     $c->text($blob->contents);
 }
 
-sub star_count {
-    my ($class, $c) = @_;
-
-    $c->throw(code => 404, message => 'Not Found') unless $c->id;
-
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new->with($c->dbh('guita'));
-    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
-    my $pick = $pick_dbi_mapper->pick($c->id);
-    $c->throw(code => 404, message => 'Not Found') unless $pick;
-
-    my $author = $pick_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
-
-    if ($c->req->method eq 'POST') {
-        $pick->star_count( $pick->star_count + ($c->req->param('count') || 1) );
-        $pick_dbi_mapper->update_pick($pick);
-    }
-    $c->json({
-        star_count => $pick->star_count,
-    });
-}
-
 sub picks {
     my ($class, $c) = @_;
 

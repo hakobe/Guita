@@ -39,7 +39,6 @@ sub update_pick {
             UPDATE pick
             SET
                 description = :description,
-                star_count  = :star_count,
                 modified    = :modified
             WHERE
                 uuid = :uuid
@@ -47,7 +46,6 @@ sub update_pick {
         {
             uuid        => $pick->uuid,
             description => encode_utf8($pick->description),
-            star_count  => $pick->star_count,
             modified    => $pick->modified,
         },
     );

@@ -8,10 +8,6 @@
         <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
       [% END %]
     </h1>
-    <div class="pick-star-count" data-pickid="[% pick.uuid %]">
-      <button class="add-pick-star btn btn-mini">★</button>
-      <span class="pick-star-container">[% IF pick.star_count %][%- FOR i in [0..(pick.star_count-1)] -%]★[%- END -%][% END %]</span>
-    </div>
     <div class="pick-clone-command">
       <i class="icon-ok-sign"></i><code>git clone [% repository_url %] guita-[% pick.uuid %]</code>
     </div>

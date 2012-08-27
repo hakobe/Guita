@@ -25,36 +25,6 @@
     <link rel="stylesheet" href="/css/bootstrap.css" type="text/css" media="all" />
     <link rel="stylesheet" href="/css/prettify.css" type="text/css" media="all" />[% # XXX %]
     <link rel="stylesheet" href="/css/guita.css" type="text/css" media="all" />
-    <!-- star -->
-    <script type="text/javascript">
-    $(function() {
-      $('.pick-star-count').each( function(i, e) {
-        var elem = $(e);
-        var id = elem.attr('data-pickid');
-        var timer;
-        var count = 0;
-        $('.add-pick-star', elem).click(function(e) {
-          $('.pick-star-container', elem).append('★');
-          count += 1;
-          if (timer) {
-            clearTimeout(timer);
-          }
-          timer = setTimeout(function() {
-            $.ajax({
-              type: 'POST',
-              url: '/api/pick/' + id + '/-/star_count',
-              data: {
-                count: count
-              },
-              dataType: 'json'
-            }).done(function(data) {
-            });
-            count = 0;
-          }, 1000);
-        });
-      });
-    });
-    </script>
 
   </head>
   <body onload="prettyPrint();">

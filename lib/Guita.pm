@@ -23,8 +23,6 @@ route "/{id:[0-9]+}/:sha/-/edit"    => "Guita::Handler::Pick edit";
 route "/{id:[0-9]+}/:sha/-/delete"  => "Guita::Handler::Pick delete";
 route "/{id:[0-9]+}/:sha/:filename" => "Guita::Handler::Pick raw";
 
-route "/api/pick/{id:[0-9]+}/-/star_count"  => "Guita::Handler::Pick star_count";
-
 route "/:username"       => "Guita::Handler::Pick picks";
 
 1;

@@ -18,10 +18,6 @@
         <div class="pick-show">
           <div class="pick-info-short">
             <a href="/[% recent.pick.uuid %]">[% strip(recent.pick.description, 140) || recent.pick.uuid %]</a>
-            <div class="pick-star-count" data-pickid="[% recent.pick.uuid %]">
-              <button class="add-pick-star btn btn-mini">★</button>
-              <span class="pick-star-container">[% IF recent.pick.star_count %][%- FOR i in [0..(recent.pick.star_count-1)] -%]★[%- END -%][% END %]</span>
-            </div>
             <div class="pick-info-short-sub">
               [% recent.pick.modified %]
               [% IF !recent.author.is_guest %]

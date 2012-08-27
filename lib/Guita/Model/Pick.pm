@@ -12,7 +12,6 @@ use Class::Accessor::Lite (
     rw => [qw(
         uuid
         user_id
-        star_count
     )],
 );
 
