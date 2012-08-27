@@ -8,26 +8,24 @@ use parent qw(Guita::Base);
 
 our @EXPORT = qw(config);
 
-use Guita::Pick;
+route "/"                => "Guita::Handler::Pick default";
+route "/picks"           => "Guita::Handler::Pick picks";
+route "/picks/-/create"  => "Guita::Handler::Pick create";
+route "/mine"            => "Guita::Handler::Pick mine";
 
-route "/"                => "Guita::Pick default";
-route "/picks"           => "Guita::Pick picks";
-route "/picks/-/create"  => "Guita::Pick create";
-route "/mine"            => "Guita::Pick mine";
+route "/auth"          => "Guita::Handler::Auth";
+route "/auth/callback" => "Guita::Handler::Auth callback";
+route "/auth/logout"   => "Guita::Handler::Auth logout";
 
-route "/auth"          => "Guita::Auth";
-route "/auth/callback" => "Guita::Auth callback";
-route "/auth/logout"   => "Guita::Auth logout";
+route "/{id:[0-9]+}"                => "Guita::Handler::Pick pick";
+route "/{id:[0-9]+}/:sha"           => "Guita::Handler::Pick pick";
+route "/{id:[0-9]+}/:sha/-/edit"    => "Guita::Handler::Pick edit";
+route "/{id:[0-9]+}/:sha/-/delete"  => "Guita::Handler::Pick delete";
+route "/{id:[0-9]+}/:sha/:filename" => "Guita::Handler::Pick raw";
 
-route "/{id:[0-9]+}"                => "Guita::Pick pick";
-route "/{id:[0-9]+}/:sha"           => "Guita::Pick pick";
-route "/{id:[0-9]+}/:sha/-/edit"    => "Guita::Pick edit";
-route "/{id:[0-9]+}/:sha/-/delete"  => "Guita::Pick delete";
-route "/{id:[0-9]+}/:sha/:filename" => "Guita::Pick raw";
+route "/api/pick/{id:[0-9]+}/-/star_count"  => "Guita::Handler::Pick star_count";
 
-route "/api/pick/{id:[0-9]+}/-/star_count"  => "Guita::Pick star_count";
-
-route "/:username"       => "Guita::Pick picks";
+route "/:username"       => "Guita::Handler::Pick picks";
 
 1;
 __END__

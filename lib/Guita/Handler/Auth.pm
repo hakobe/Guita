@@ -1,9 +1,9 @@
-package Guita::Auth;
+package Guita::Handler::Auth;
 use strict;
 use warnings;
 
 use Guita::Config;
-use Guita::Mapper::DBI;
+use Guita::Mapper::DBI::User;
 
 use URI;
 use LWP::UserAgent;
@@ -64,8 +64,8 @@ sub callback {
     my $sk = sha1_hex(
         join('-', 'salt', config->param('session_key_salt'), $user_json->{id}, time())
     );
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
-    my $user = $dbi_mapper->user_from_github_id($user_json->{id});
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
+    my $user = $user_dbi_mapper->user_from_github_id($user_json->{id});
     if ($user) {
         $user->sk($sk);
         my $struct = $user->struct;
@@ -73,10 +73,10 @@ sub callback {
         $struct->{api}->{user_keys} = $user_keys_json;
         $user->{struct} = encode_json($struct);
         $user->name( $user_json->{login} );
-        $dbi_mapper->update_user($user);
+        $user_dbi_mapper->update_user($user);
     }
     else {
-        my $uuid = $dbi_mapper->create_user({
+        my $uuid = $user_dbi_mapper->create_user({
             github_id => $user_json->{id},
             name      => $user_json->{login},
             sk        => $sk,
@@ -87,7 +87,7 @@ sub callback {
                 }
             },
         });
-        $user = $dbi_mapper->user_from_uuid($uuid);
+        $user = $user_dbi_mapper->user_from_uuid($uuid);
     }
     my $expires = DateTime::Format::HTTP->format_datetime(
         DateTime->now(time_zone => 'local')->add( days => 7 )
@@ -111,9 +111,9 @@ sub logout {
     my ($self, $c) = @_;
     $c->throw(code => 400, message => 'Bad Request') if $c->user->is_guest;
 
-    my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
     $c->user->sk('');
-    $dbi_mapper->update_user($c->user);
+    $user_dbi_mapper->update_user($c->user);
 
     $c->redirect('/');
 }

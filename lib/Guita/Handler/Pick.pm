@@ -1,10 +1,11 @@
-package Guita::Pick;
+package Guita::Handler::Pick;
 use strict;
 use warnings;
 
 use Guita::Config;
 use Guita::Git;
 use Guita::Mapper::DBI;
+use Guita::Mapper::DBI::User;
 use Guita::Mapper::Git;
 use Guita::Model::User::Guest;
 use Guita::Utils qw(is_valid_filename now);
@@ -153,10 +154,11 @@ sub pick {
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
     my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
     my $pick = $dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $author = $dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+    my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
 
     my $git_mapper;
     try {
@@ -234,6 +236,7 @@ sub star_count {
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
     my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
     my $pick = $dbi_mapper->pick($c->id);
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
@@ -252,13 +255,14 @@ sub picks {
     my ($class, $c) = @_;
 
     my $dbi_mapper = Guita::Mapper::DBI->new->with($c->dbh('guita'));
+    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
     my $pager = Guita::Pager->new({
         count    => $dbi_mapper->picks_count,
         per_page => 10,
         page     => $c->req->number_param('page') || 1,
     });
 
-    my $author = $dbi_mapper->user_from_name($c->username) if $c->username;
+    my $author = $user_dbi_mapper->user_from_name($c->username) if $c->username;
     my $recents = [ map { 
         my $pick = $_;
         my $work_tree = dir(config->param('repository_base'))->subdir($pick->uuid);
@@ -270,7 +274,7 @@ sub picks {
         my $blob_with_name = $tree->blobs_list->[0];
         $blob_with_name ? +{
             pick   => $pick,
-            author => ($dbi_mapper->user_from_uuid($pick->user_id) || Guita::Model::User::Guest->new),
+            author => ($user_dbi_mapper->user_from_uuid($pick->user_id) || Guita::Model::User::Guest->new),
             name   => $blob_with_name->{name},
             blob   => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
         } : ()
