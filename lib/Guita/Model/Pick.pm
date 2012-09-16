@@ -9,10 +9,18 @@ use Encode;
 
 use Class::Accessor::Lite (
     new => 1,
-    rw => [qw(
-        uuid
-        user_id
-    )],
+    rw => [
+        qw(
+            uuid
+            user_id
+        ),
+        # expandable by Guita::Service::Pick
+        qw(
+            author
+            logs
+            files
+        ),
+    ],
 );
 
 sub created {

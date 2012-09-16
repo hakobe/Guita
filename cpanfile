@@ -1,3 +1,4 @@
+requires 'Module::Install'
 requires 'Plack';
 requires 'Plack::Session';
 requires 'Plack::Middleware::StaticShared';

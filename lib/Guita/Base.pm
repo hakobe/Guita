@@ -23,6 +23,7 @@ use Guita::Git;
 use DBI;
 
 use Guita::Mapper::DBI;
+use Guita::Mapper::DBI::User;
 use Guita::Model::User::Guest;
 
 our $router = Router::Simple->new;
@@ -45,6 +46,9 @@ sub before_dispatch {
     my ($self) = @_;
     $self->res->header('X-Frame-Options'  => 'DENY');
     $self->res->header('X-XSS-Protection' => '1');
+
+    Guita::Mapper::DBI->default_storage($self->dbh('guita'));
+
     $self->req->_context($self);
 }
 
@@ -114,6 +118,7 @@ sub git {
 
 ### DBI
 
+# Connector使うようにする
 sub dbh {
     my ($self, $name) = @_;
     $self->{_dbh}->{$name} ||= do {
@@ -137,9 +142,8 @@ sub user {
     my ($self) = @_;
 
     $self->{_user} ||= do {
-        my $dbi_mapper = Guita::Mapper::DBI->new->with($self->dbh('guita'));
         my $sk = $self->req->cookies->{csk};
-        my $user = $sk && $dbi_mapper->user_from_sk($sk);
+        my $user = $sk && Guita::Mapper::DBI::User->new->user_from_sk($sk);
         $user || Guita::Model::User::Guest->new;
     };
 }

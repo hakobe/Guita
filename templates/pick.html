@@ -22,7 +22,7 @@
 <div class="row">
   <div id="pick-main" class="span10">
     <div id="pick-files">
-      [% FOR file IN files %]
+      [% FOR file IN pick.files %]
         <div class="code-show">
           <div class="code-info">
             <span class="code-filename">[% file.name %]</span>
@@ -46,7 +46,7 @@
     </dl>
     <h2>Revisions</h2>
     <ul class="logs unstyled">
-      [% FOR log IN logs %]
+      [% FOR log IN pick.logs %]
         <li class="log">
           <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span><br>
           <span class="commiter">[% log.author_name %]</span><br>

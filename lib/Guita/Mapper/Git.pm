@@ -10,7 +10,29 @@ use Guita::Model::Git::Object::Blob;
 use Guita::Model::Git::Object::Tree;
 
 use List::Util qw(reduce);
+use Path::Class;
 use Encode;
+
+sub new_with_git_dir {
+    my ($class, $git_dir) = @_;
+
+    $class->new->with( Guita::Git->new(git_dir => $git_dir) );
+}
+
+sub new_with_work_tree {
+    my ($class, $work_tree) = @_;
+
+    $class->new->with( Guita::Git->new(work_tree => $work_tree) );
+}
+
+sub init {
+    my ($class, $work_tree) = @_;
+    # エラー処理まともにする
+    dir($work_tree)->mkpath unless -e $work_tree;
+    Guita::Git->run(init => $work_tree);
+
+    $class->new->with( Guita::Git->new(work_tree => $work_tree) );
+}
 
 sub git {
     my ($self) = @_;
@@ -72,7 +94,7 @@ sub tree_with_children {
     $tree;
 }
 
-sub tree_for_path {
+sub object_for_path {
     my ($self, $objectish, $path) = @_;
 
     my $tree = $self->tree_with_children($objectish);

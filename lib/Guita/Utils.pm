@@ -15,7 +15,7 @@ sub now () {
 
 sub is_valid_filename {
     my ($filename) = @_;
-    $filename =~ m/^(?!\.)[a-zA-Z0-9\._-]+/xms;
+    $filename =~ m{^(?!\.\.)[^/]+}xms;
 }
 
 

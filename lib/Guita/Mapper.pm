@@ -12,9 +12,18 @@ sub with {
     $self;
 }
 
+my $DEFAULT_STORAGE;
+sub default_storage {
+    my ($class, $storage) = @_;
+    if ($storage) {
+        $DEFAULT_STORAGE = $storage;
+    }
+    return $DEFAULT_STORAGE;
+}
+
 sub storage {
     my ($self) = @_;
-    $self->{storage};
+    return $self->{storage} || $self->default_storage;
 }
 
 1;

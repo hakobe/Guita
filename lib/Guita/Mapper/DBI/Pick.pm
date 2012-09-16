@@ -4,6 +4,9 @@ use warnings;
 
 use parent qw(Guita::Mapper::DBI);
 
+use Guita::Utils qw(now);
+use Encode;
+
 sub create_pick {
     my ($self, $args) = @_;
 
