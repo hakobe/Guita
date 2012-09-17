@@ -1,19 +1,14 @@
 package Guita::Handler::Pick;
-use strict;
-use warnings;
+use prelude;
 
-use Guita::Config;
 use Guita::Git;
-use Guita::Mapper::DBI::User;
-use Guita::Mapper::DBI::Pick;
-use Guita::Mapper::Git;
 use Guita::Model::User::Guest;
 use Guita::Service::Pick;
+use Guita::Service::PickList;
 use Guita::Pager;
 use Guita::Utils qw(is_valid_filename now);
 
 use Path::Class;
-use Try::Tiny;
 use List::MoreUtils qw(each_array);
 use URI::Escape;
 
@@ -29,14 +24,14 @@ sub create {
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
 
         my $pick_service = Guita::Service::Pick->new( dbh => $c->dbh('guita') );
-        my $id = $pick_service->create(
+        my $pick = $pick_service->create(
             $c->user,
             $filename,
             $c->req->string_param('code') || '',
             $c->req->string_param('description') || '',
         );
 
-        $c->redirect("/$id");
+        $c->redirect("/".$pick->id);
     }
     $c->html('create.html', {
         user => $c->user,
@@ -47,67 +42,44 @@ sub edit {
     my ($class, $c) = @_;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
-    my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
-    my $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-        $work_tree->stringify,
-    );
 
     # HEADを変更するが、同時に変更が起こった場合不整合が起こる
-    my $tree = $git_mapper->tree_with_children('HEAD');
-    my $user_dbi_mapper = Guita::Mapper::DBI::User->new;
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-    my $pick = $pick_dbi_mapper->pick($c->id);
+    my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
+    my $pick_service = Guita::Service::Pick->new;
+    $pick_service->fill_from_git($pick, $c->sha);
+    $pick_service->fill_user($pick);
+
+    $c->throw(code => 403, message => 'Forbidden')
+        if $c->user->is_guest || $pick->author->id != $c->user->id;
 
     if ($c->req->method eq 'GET') {
-
-        my $files = [ map { +{
-            name => $_->{name}, 
-            blob => $git_mapper->blob_with_contents($_->{obj}->objectish),
-        } } @{ $tree->blobs_list } ];
-
         $c->html('edit.html', {
             user => $c->user,
             id    => $c->id,
             sha   => $c->sha,
             pick  => $pick,
-            files => $files,
         });
     }
     elsif ($c->req->method eq 'POST') {
-        # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
-        $pick->description($c->req->string_param('description') || '');
-        $pick->modified(now());
-        $pick_dbi_mapper->update_pick($pick);
+        my @paths = $c->req->string_param('name');
+        my @contents = $c->req->string_param('code');
 
-        # TODO 変更対象のファイルをロックする
-        # TODO ファイルがなくなったら削除する
-        my @names = $c->req->string_param('name');
-        my @codes = $c->req->string_param('code');
-
-        my $name_generator = each_array(@names, @codes);
-
-        $git_mapper->git->run(qw(reset --hard)); # 不要?
-        while (my ($name, $code) = $name_generator->()) {
-            # textareaの内容をファイルに書きだして
-            my $filename = $name || 'gitfile1';
-            $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
-
-            my $file = $work_tree->file($filename);
-            my $fh = $file->openw;
-            $code =~ s/\r\n/\n/g;
-            print $fh $code;
-            close $fh;
-
-            # add して
-            $git_mapper->add($file->stringify);
+        my $code_generator = each_array(@paths, @contents);
+        my @codes;
+        while (my ($path, $content) = $code_generator->()) {
+            push @codes, { path => $path, content => $content };
         }
-        # 最後にcommit
-        $git_mapper->commit('edited in guita web form', {author => $c->user});
 
-        $c->redirect(sprintf("/%s", $c->id));
+        $pick_service->edit(
+            $pick,
+            $c->user,
+            \@codes,
+            $c->req->string_param('description') || '',
+        );
+
+        $c->redirect(sprintf("/%s", $pick->id));
     }
 }
 
@@ -117,15 +89,15 @@ sub delete {
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
     if ($c->req->method eq 'POST') {
-        my $user_dbi_mapper = Guita::Mapper::DBI::User->new;
-        my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-        my $pick = $pick_dbi_mapper->pick($c->id);
+        my $pick_service = Guita::Service::Pick->new;
+
+        my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-        my $author = $user_dbi_mapper->user_from_uuid( $pick->user_id ) || Guita::Model::User::Guest->new;
-        $c->throw(code => 403, message => 'Forbidden') if $author->is_guest || $c->user->uuid ne $author->uuid;
+        $pick_service->fill_user($pick);
+        $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
-        $pick_dbi_mapper->delete_pick($pick);
+        $pick->delete;
     }
 
     $c->redirect('/picks');
@@ -137,11 +109,12 @@ sub pick {
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
-    my $pick = Guita::Mapper::DBI::Pick->new->pick($c->id);
+    my $pick = $c->dbixl->table('pick')->search({ id => $c->id})->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
     my $pick_service = Guita::Service::Pick->new;
-    $pick_service->expande_pick($pick, $c->sha);
+    $pick_service->fill_user($pick);
+    $pick_service->fill_from_git($pick, $c->sha);
 
     $c->html('pick.html', {
         user            => $c->user,
@@ -149,7 +122,7 @@ sub pick {
         sha             => $c->sha || $pick->logs->[0]->objectish,
         head_sha        => $pick->logs->[0]->objectish,
         pick            => $pick,
-        repository_url  => config->param('remote_repository_base') . '/' . $c->id,
+        repository_url  => GuitaConf('remote_repository_base') . '/' . $c->id,
     });
 }
 
@@ -160,77 +133,36 @@ sub raw {
     $c->throw(code => 404, message => 'Not Found') unless $c->sha;
     $c->throw(code => 404, message => 'Not Found') unless $c->filename;
 
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-    my $pick = $pick_dbi_mapper->pick($c->id);
+    my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $git_mapper;
-    try {
-        my $work_tree = dir(config->param('repository_base'))->subdir($c->id);
-        $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-            $work_tree->stringify,
-        );
-    };
-    $c->throw(code => 404, message => 'Not Found') unless $git_mapper;
+    my $content = Guita::Service::Pick->new->file_content_at(
+        $pick,
+        $c->sha,
+        $c->filename,
+    );
 
-    my $tree;
-    try {
-        $tree = $git_mapper->tree_with_children($c->sha);
-    };
-    $c->throw(code => 404, message => 'Not Found') unless $tree;
-
-    $c->throw(code => 404, message => 'Not Found') unless $tree->blobs->{$c->filename};
-    my $blob = $git_mapper->blob_with_contents($tree->blobs->{$c->filename}->objectish);
-
-    $c->text($blob->contents);
+    $c->text($content);
 }
 
 sub picks {
     my ($class, $c) = @_;
 
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-    my $user_dbi_mapper = Guita::Mapper::DBI::User->new;
+    my $page = $c->req->number_param('page');
     my $pager = Guita::Pager->new({
-        count    => $pick_dbi_mapper->picks_count,
+        count    => $c->dbixl->table('pick')->select->count,
         per_page => 10,
-        page     => $c->req->number_param('page') || 1,
+        page     => ($page && $page =~ m/^\d+$/xms) ? $page : 1,
     });
 
-    my $author = $user_dbi_mapper->user_from_name($c->username) if $c->username;
-    my $recents = [ 
-        map { 
-            my $pick = $_;
-            my $work_tree = dir(config->param('repository_base'))->subdir($pick->uuid);
-
-            my $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-                $work_tree->stringify,
-            );
-            my $tree = $git_mapper->tree_with_children('HEAD');
-
-            my $blob_with_name = $tree->blobs_list->[0];
-            $blob_with_name ? +{
-                pick   => $pick,
-                author => ($user_dbi_mapper->user_from_uuid($pick->user_id) || Guita::Model::User::Guest->new),
-                name   => $blob_with_name->{name},
-                blob   => $git_mapper->blob_with_contents($blob_with_name->{obj}->objectish),
-            } : ()
-        }
-        grep {
-            my $pick = $_;
-            my $work_tree = dir(config->param('repository_base'))->subdir($pick->uuid);
-            -e $work_tree->stringify;
-        }
-        @{
-            $author ? $pick_dbi_mapper->picks_for_user($author, {offset => $pager->offset, limit => $pager->limit})
-                    : $pick_dbi_mapper->picks({offset => $pager->offset, limit => $pager->limit})
-                    ;
-        }
-    ];
+    my $picks = Guita::Service::PickList->new->list({
+        limit  => $pager->limit,
+        offset => $pager->offset,
+    });
 
     $c->html('picks.html', {
         user    => $c->user,
-        author  => $author,
-        recents => $recents,
+        recents => $picks,
         pager   => $pager,
     });
 }

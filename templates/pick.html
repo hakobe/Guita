@@ -3,13 +3,13 @@
 <div class="row">
   <div id="pick-info" class="span10">
     <h1 class="pick-description">
-      [% pick.description || pick.uuid %]
+      [% pick.description || pick.id %]
       [% IF sha == head_sha %]
         <a href="/[% id %]/[% head_sha %]/-/edit"> <button class="btn btn-mini">edit</button></a>
       [% END %]
     </h1>
     <div class="pick-clone-command">
-      <i class="icon-ok-sign"></i><code>git clone [% repository_url %] guita-[% pick.uuid %]</code>
+      <i class="icon-ok-sign"></i><code>git clone [% repository_url %] guita-[% pick.id %]</code>
     </div>
     <!--
     <dl>
@@ -38,7 +38,7 @@
     <h2>Info</h2>
     <dl>
       <dt>Author</dt>
-      <dd>[% author.name %]</dd>
+      <dd>[% pick.author.name %]</dd>
       <dt>Created</dt>
       <dd>[% pick.created %]</dd>
       <dt>Modified</dt>
@@ -49,12 +49,12 @@
       [% FOR log IN pick.logs %]
         <li class="log">
           <span class="commit-hash"><a href="/[% id %]/[% log.objectish %]">[% short_sha1(log.objectish) %]</a></span><br>
-          <span class="commiter">[% log.author_name %]</span><br>
+          <span class="commiter">[% log.committer_name %]</span><br>
           <span class="time_ago" data-epochtime="[% log.author_localtime %]">[% datetime_epoch(log.author_localtime) %]</span>
         </li>
       [% END %]
     </ul>
-    [% IF sha == head_sha && !user.is_guest && user.uuid == author.uuid %]
+    [% IF sha == head_sha && !user.is_guest && user.id == author.id %]
       <div class="pick-delete">
         <button id="pick-delete-btn" class="btn-mini btn">Delete this</button>
 

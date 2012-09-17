@@ -22,7 +22,7 @@ my $XSLATE = Text::Xslate->new(
         'Text::Xslate::Bridge::TT2Like'
     ],
     path   => [
-        config->root->subdir('templates')
+        Guita::Config->root->subdir('templates')
     ],
     cache_dir => '/tmp/guitacache',
     cache     => 1,

@@ -12,7 +12,7 @@ use JSON::XS;
 
 sub is_guest { 1 }
 
-sub uuid { 0 }
+sub id { 0 }
 
 sub github_id { -1 }
 

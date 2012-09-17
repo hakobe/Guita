@@ -1,29 +1,26 @@
 package Guita::Base;
-
-use utf8;
-use strict;
-use warnings;
+use prelude;
 
 use Exporter::Lite;
 
-our @EXPORT = qw(config route);
+our @EXPORT = qw(route);
 
 use Router::Simple;
-use Try::Tiny;
 use Class::Load qw(load_class);
 use Plack::Session;
 
-use Guita::Config;
 use Guita::Exception;
 use Guita::Request;
 use Guita::Response;
 use Guita::Views;
 
+use Guita::DataBase;
+
 use Guita::Git;
 use DBI;
 
-use Guita::Mapper::DBI;
-use Guita::Mapper::DBI::User;
+#use Guita::Mapper::DBI;
+#use Guita::Mapper::DBI::User;
 use Guita::Model::User::Guest;
 
 our $router = Router::Simple->new;
@@ -47,7 +44,6 @@ sub before_dispatch {
     $self->res->header('X-Frame-Options'  => 'DENY');
     $self->res->header('X-XSS-Protection' => '1');
 
-    Guita::Mapper::DBI->default_storage($self->dbh('guita'));
 
     $self->req->_context($self);
 }
@@ -81,7 +77,7 @@ sub run {
     }
     catch {
         if (try { $_->isa('Guita::Exception') }) {
-            warn $_->{trace} if config->param('trace_exception');
+            warn $_->{trace} if GuitaConf('trace_exception');
             $c->res->code($_->{code});
             $c->res->header('X-Message' => $_->{message}) if $_->{message};
             $c->res->header('Location' => $_->{location}) if $_->{location};
@@ -118,11 +114,20 @@ sub git {
 
 ### DBI
 
+sub db {
+    Guita::DataBase->instance;
+}
+
+sub dbixl {
+    my ($self) = @_;
+    $self->db->dbixl;
+}
+
 # Connector使うようにする
 sub dbh {
     my ($self, $name) = @_;
     $self->{_dbh}->{$name} ||= do {
-        my $dsn = config->param("dsn_$name") or croak "Unknwon DSN: $name";
+        my $dsn = GuitaConf("dsn_$name") or croak "Unknwon DSN: $name";
         my $dsa = [ DBI->parse_dsn($dsn) ];
 
         my $dbh = DBI->connect($dsn, 'nobody', 'nobody', {
@@ -143,7 +148,7 @@ sub user {
 
     $self->{_user} ||= do {
         my $sk = $self->req->cookies->{csk};
-        my $user = $sk && Guita::Mapper::DBI::User->new->user_from_sk($sk);
+        my $user = $sk && $self->dbixl->table('user')->search({ sk => $sk })->single;
         $user || Guita::Model::User::Guest->new;
     };
 }

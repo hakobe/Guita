@@ -17,7 +17,7 @@
       [% FOR recent IN recents %]
         <div class="pick-show">
           <div class="pick-info-short">
-            <a href="/[% recent.pick.uuid %]">[% strip(recent.pick.description, 140) || recent.pick.uuid %]</a>
+            <a href="/[% recent.pick.id %]">[% strip(recent.pick.description, 140) || recent.pick.id %]</a>
             <div class="pick-info-short-sub">
               [% recent.pick.modified %]
               [% IF !recent.author.is_guest %]

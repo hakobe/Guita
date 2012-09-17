@@ -1,4 +1,10 @@
-requires 'Module::Install'
+use inc::Module::Install;
+
+name    'Guita';
+version '0.00';
+license 'in-company'; 
+
+requires 'Module::Install';
 requires 'Plack';
 requires 'Plack::Session';
 requires 'Plack::Middleware::StaticShared';
@@ -11,6 +17,7 @@ requires 'DBD::mysql';
 requires 'Path::Class';
 requires 'File::Spec';
 requires 'Class::Accessor::Lite';
+requires 'Class::Accessor::Lite::Lazy';
 requires 'Encode';
 requires 'DateTime';
 requires 'DateTime::Format::MySQL';
@@ -39,3 +46,8 @@ requires 'Data::Dumper';
 requires 'Config::ENV';
 requires 'Router::Simple';
 requires 'Devel::KYTProf';
+
+requires 'DBIx::Lite';
+requires 'DBIx::Sunny';
+
+WriteAll;

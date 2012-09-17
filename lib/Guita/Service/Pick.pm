@@ -1,36 +1,25 @@
 package Guita::Service::Pick;
-use strict;
-use warnings;
+use prelude;
+use parent qw(Guita::Service);
 
-use Guita::Config;
 use Guita::Git;
-use Guita::Mapper::DBI::Pick;
-use Guita::Mapper::DBI::User;
-
 use Path::Class;
-use Try::Tiny;
-
-use Class::Accessor::Lite (
-    new => 1,
-);
 
 sub collect_files_for {
     my ($self, $pick, $sha) = @_;
 
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-
-    my $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-        dir(config->param('repository_base'))->subdir($pick->uuid),
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id),
     );
-    return unless $git_mapper;
+    return unless $git;
 
     my $files = [];
     try {
-        $git_mapper->traverse_tree( $sha, sub {
+        $git->traverse_tree( $sha, sub {
             my ($obj, $path) = @_;
             push @$files, +{ # Fileオブジェクトにする
                 name => $path,
-                blob => $git_mapper->blob_with_contents($obj->objectish),
+                blob => $git->blob_with_contents($obj->objectish),
             };
         });
     }
@@ -42,18 +31,18 @@ sub collect_files_for {
     return $files;
 }
 
-sub expande_pick {
+sub fill_from_git {
     my ($self, $pick, $sha) = @_;
     return unless $pick;
 
-    my $author = Guita::Mapper::DBI::User->new->user_from_uuid( $pick->user_id ) 
+    my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
         || Guita::Model::User::Guest->new;
 
     # work_treeの存在チェック?
-    my $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-        dir(config->param('repository_base'))->subdir($pick->uuid)->stringify,
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
     );
-    my $logs = $git_mapper->logs(10, 'HEAD');
+    my $logs = $git->logs(10, 'HEAD');
     $sha ||= $logs->[0]->objectish;
 
     $pick->author($author);
@@ -63,31 +52,43 @@ sub expande_pick {
     return $pick;
 }
 
-sub retrieve_file_content {
+sub fill_user {
+    my ($self, $pick) = @_;
+    return unless $pick;
+
+    my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
+        || Guita::Model::User::Guest->new;
+
+    $pick->author($author);
+
+    return $pick;
+}
+
+sub file_content_at {
     my ($self, $pick, $sha, $path) = @_;
     return unless $pick;
 
-    my $git_mapper = Guita::Mapper::Git->new_with_work_tree(
-        dir(config->param('repository_base'))->subdir($pick->uuid)->stringify,
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
     );
 
-    my $object = $git_mapper->object_for_path($path);
-    return $git_mapper->cat_file($object->objectish);
+    my $object = $git->object_for_path($sha, $path);
+    return $git->cat_file($object->objectish);
 }
 
 sub create {
     my ($self, $user, $filename, $content, $description) = @_;
     # asert
 
-    my $pick_dbi_mapper = Guita::Mapper::DBI::Pick->new;
-
-    my $id = $pick_dbi_mapper->create_pick({
-        user_id     => $user->uuid,
+    my $pick = $self->dbixl->table('pick')->insert({
+        user_id     => $user->id,
         description => $description,
     });
-    my $work_tree = dir(config->param('repository_base'))->subdir($id)->stringify;
-    my $git_mapper = Guita::Mapper::Git->init($work_tree);
-    $git_mapper->config(qw(receive.denyCurrentBranch ignore));
+
+    # bare でうまいことしたいなぁ
+    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify;
+    my $git = Guita::Git->init($work_tree);
+    $git->config(qw(receive.denyCurrentBranch ignore));
 
     # まともなエラー処理
 
@@ -100,18 +101,45 @@ sub create {
     close $fh;
 
     # add して
-    $git_mapper->add($file->stringify);
+    $git->add($file->stringify);
 
     # commit
-    $git_mapper->commit('edited in guita web form', {author => $user});
+    $git->commit('edited in guita web form', {author => $user});
 
-    return $id;
+    return $pick;
 }
 
 sub edit {
-}
+    my ($self, $pick, $author, $codes, $description) = @_;
+    # TODO 変更対象のファイルをロックする
+    # TODO ファイルがなくなったら削除する
 
-sub delete {
+    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+    my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
+
+
+    # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
+    $pick->update({
+        description => $description,
+        modified    => $self->dbixl->now(),
+    });
+
+    $git->run(qw(reset --hard)); # 不要?
+
+    for my $code (@$codes) {
+        my $file = $work_tree->file($code->{path});
+        next unless -e $file;
+
+        my $fh = $file->openw;
+        $code =~ s/\r\n/\n/g;
+        print $fh $code->{content};
+        close $fh;
+
+        # add して
+        $git->add($file->stringify);
+    }
+
+    $git->commit('edited in guita web form', {author => $author});
 }
 
 1;

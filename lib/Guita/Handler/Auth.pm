@@ -1,9 +1,5 @@
 package Guita::Handler::Auth;
-use strict;
-use warnings;
-
-use Guita::Config;
-use Guita::Mapper::DBI::User;
+use prelude;
 
 use URI;
 use LWP::UserAgent;
@@ -22,7 +18,7 @@ sub default {
 
     my $uri = URI->new('https://github.com/login/oauth/authorize');
     $uri->query_form(
-        client_id => config->param('github_client_id'),
+        client_id => GuitaConf('github_client_id'),
         scope => 'user,public_repo',
     );
 
@@ -38,8 +34,8 @@ sub callback {
     my $token_res = $ua->request(POST(
         'https://github.com/login/oauth/access_token', 
         [
-            client_id     => config->param('github_client_id'),
-            client_secret => config->param('github_client_secret'),
+            client_id     => GuitaConf('github_client_id'),
+            client_secret => GuitaConf('github_client_secret'),
             code          => scalar($c->req->param('code')),
         ],
     ));
@@ -62,32 +58,34 @@ sub callback {
     my $user_keys_json = decode_json($user_keys_res->content);
 
     my $sk = sha1_hex(
-        join('-', 'salt', config->param('session_key_salt'), $user_json->{id}, time())
+        join('-', 'salt', GuitaConf('session_key_salt'), $user_json->{id}, time())
     );
-    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
-    my $user = $user_dbi_mapper->user_from_github_id($user_json->{id});
+    my $user = $c->dbixl->table('user')->search({ github_id => $user_json->{id} })->single;
     if ($user) {
         $user->sk($sk);
         my $struct = $user->struct;
         $struct->{api}->{user}      = $user_json;
         $struct->{api}->{user_keys} = $user_keys_json;
         $user->{struct} = encode_json($struct);
-        $user->name( $user_json->{login} );
-        $user_dbi_mapper->update_user($user);
+
+        $user->update({
+            name   => $user_json->{login},
+            sk     => $sk,
+            struct => encode_json( $struct ),
+        });
     }
     else {
-        my $uuid = $user_dbi_mapper->create_user({
+        $user = $c->dbixl->table('user')->insert({
             github_id => $user_json->{id},
             name      => $user_json->{login},
             sk        => $sk,
-            struct    => {
+            struct    => encode_json({
                 api => {
                     user      => $user_json,
                     user_keys => $user_keys_json,
                 }
-            },
+            }),
         });
-        $user = $user_dbi_mapper->user_from_uuid($uuid);
     }
     my $expires = DateTime::Format::HTTP->format_datetime(
         DateTime->now(time_zone => 'local')->add( days => 7 )
@@ -95,14 +93,14 @@ sub callback {
     my $domain = $c->req->uri->host;
     $c->res->headers->header('Set-Cookie' => qq[csk=$sk; path=/; expires=$expires; domain=$domain;]);
 
-    if (config->param('authorized_keys')) {
-        my $authorized_keys = file(config->param('authorized_keys'))->absolute;
-        my $fh = $authorized_keys->open('w+');
-        if ($fh) {
-            print $fh "\n".$user->ssh_keys;
-            close $fh;
-        }
-    }
+#    if (config->param('authorized_keys')) {
+#        my $authorized_keys = file(config->param('authorized_keys'))->absolute;
+#        my $fh = $authorized_keys->open('w+');
+#        if ($fh) {
+#            print $fh "\n".$user->ssh_keys;
+#            close $fh;
+#        }
+#    }
 
     $c->redirect('/');
 }
@@ -111,9 +109,7 @@ sub logout {
     my ($self, $c) = @_;
     $c->throw(code => 400, message => 'Bad Request') if $c->user->is_guest;
 
-    my $user_dbi_mapper = Guita::Mapper::DBI::User->new->with($c->dbh('guita'));
-    $c->user->sk('');
-    $user_dbi_mapper->update_user($c->user);
+    $c->user->update({ sk => '' });
 
     $c->redirect('/');
 }

@@ -6,7 +6,7 @@ use warnings;
 use v5.14;
 
 use Exporter::Lite;
-our @EXPORT = qw(config);
+our @EXPORT = qw(config GuitaConf);
 use Path::Class;
 
 sub new {
@@ -16,6 +16,10 @@ sub new {
         config => $config,
     }, $class;
     $self;
+}
+
+sub GuitaConf {
+    config()->param($_[0]);
 }
 
 sub config {

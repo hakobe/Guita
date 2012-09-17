@@ -1,5 +1,5 @@
 CREATE TABLE `pick` (
-    `uuid`        BIGINT UNSIGNED NOT NULL,
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `user_id`     BIGINT UNSIGNED NOT NULL,
     `description` TEXT NOT NULL DEFAULT '',
     `star_count`  INTEGER UNSIGNED NOT NULL DEFAULT 0,
@@ -10,11 +10,11 @@ CREATE TABLE `pick` (
     KEY `user` (`user_id`, `created`),
     KEY `created` (`created`),
     KEY `modified` (`modified`),
-    PRIMARY KEY (`uuid`)
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;
 
 CREATE TABLE `user` (
-    `uuid`        BIGINT UNSIGNED NOT NULL,
+    `id`          BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
     `github_id`   INTEGER UNSIGNED NOT NULL,
     `name`        VARCHAR(128) NOT NULL,
     `sk`          VARCHAR(255) NOT NULL,
@@ -24,5 +24,5 @@ CREATE TABLE `user` (
     UNIQUE KEY (`github_id`),
     UNIQUE KEY (`sk`),
     UNIQUE KEY (`name`),
-    PRIMARY KEY (`uuid`)
+    PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=binary;

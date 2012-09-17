@@ -10,13 +10,6 @@ use JSON::XS;
 
 use Class::Accessor::Lite (
     new => 1,
-    ro => [qw(uuid)],
-    rw => [qw(
-        uuid
-        github_id
-        name
-        sk
-    )],
 );
 
 sub is_guest { 0 }
@@ -34,7 +27,7 @@ sub is_expired {
 
 sub struct {
     my ($self) = @_;
-    decode_json($self->{struct});
+    decode_json($self->get('struct'));
 }
 
 sub email {
