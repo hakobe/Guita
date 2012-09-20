@@ -33,6 +33,15 @@ sub init {
     $class->new_with_work_tree($work_tree);
 }
 
+sub clone {
+    my ($class, $url, $work_tree) = @_;
+    # エラー処理まともにする
+    dir($work_tree)->mkpath unless -e $work_tree;
+    $class->run(clone => $url, $work_tree);
+
+    $class->new_with_work_tree($work_tree);
+}
+
 sub add {
     my ($self, $filepath) = @_;
 

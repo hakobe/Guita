@@ -13,9 +13,9 @@ sub list {
     my $picks = [
         map {
             my $pick = $_;
-            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id . '.git');
 
-            my $git = Guita::Git->new_with_work_tree( $work_tree->stringify );
+            my $git = Guita::Git->new_with_git_dir( $work_tree->stringify );
             my $tree = $git->tree_with_children('HEAD');
 
             my $blob_with_name = $tree->blobs_list->[0];
@@ -27,7 +27,7 @@ sub list {
         }
         grep {
             my $pick = $_;
-            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id . '.git');
             -e $work_tree->stringify;
         }
         $self->dbixl->table('pick')->limit($args->{limit})->offset($args->{offset})->all

@@ -3,13 +3,14 @@ use prelude;
 use parent qw(Guita::Service);
 
 use Guita::Git;
+use Guita::Gitolite;
 use Path::Class;
 
 sub collect_files_for {
     my ($self, $pick, $sha) = @_;
 
-    my $git = Guita::Git->new_with_work_tree(
-        dir(GuitaConf('repository_base'))->subdir($pick->id),
+    my $git = Guita::Git->new_with_git_dir(
+        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git'),
     );
     return unless $git;
 
@@ -39,8 +40,8 @@ sub fill_from_git {
         || Guita::Model::User::Guest->new;
 
     # work_treeの存在チェック?
-    my $git = Guita::Git->new_with_work_tree(
-        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
+    my $git = Guita::Git->new_with_git_dir(
+        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git'),
     );
     my $logs = $git->logs(10, 'HEAD');
     $sha ||= $logs->[0]->objectish;
@@ -68,8 +69,8 @@ sub file_content_at {
     my ($self, $pick, $sha, $path) = @_;
     return unless $pick;
 
-    my $git = Guita::Git->new_with_work_tree(
-        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
+    my $git = Guita::Git->new_with_git_dir(
+        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git')->stringify,
     );
 
     my $object = $git->object_for_path($sha, $path);
@@ -85,12 +86,11 @@ sub create {
         description => $description,
     });
 
-    # bare でうまいことしたいなぁ
-    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify;
-    my $git = Guita::Git->init($work_tree);
-    $git->config(qw(receive.denyCurrentBranch ignore));
+    my $gitolite = Guita::Gitolite->new;
+    $gitolite->add_repository($user, $pick->id, [$user]);
 
-    # まともなエラー処理
+    my $work_tree = dir(GuitaConf('working_base'))->subdir($pick->id)->stringify;
+    my $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $work_tree);
 
     # textareaの内容をファイルに書きだして
     my $file = dir($work_tree)->file($filename);
@@ -105,6 +105,7 @@ sub create {
 
     # commit
     $git->commit('edited in guita web form', {author => $user});
+    $git->run(qw( push -f origin master));
 
     return $pick;
 }
@@ -114,7 +115,7 @@ sub edit {
     # TODO 変更対象のファイルをロックする
     # TODO ファイルがなくなったら削除する
 
-    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+    my $work_tree = dir(GuitaConf('working_base'))->subdir($pick->id);
     my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
 
 
@@ -140,6 +141,7 @@ sub edit {
     }
 
     $git->commit('edited in guita web form', {author => $author});
+    $git->run(qw( push -f origin master));
 }
 
 1;
