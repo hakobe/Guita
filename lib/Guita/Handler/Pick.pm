@@ -74,6 +74,7 @@ sub edit {
 
         my $code_generator = each_array(@paths, @contents);
         my @codes;
+        # ディレクトリとらばーさる的なチェック
         while (my ($path, $content) = $code_generator->()) {
             push @codes, { path => $path, content => $content };
         }
