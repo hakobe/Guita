@@ -43,7 +43,6 @@ sub edit {
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
-    # HEADを変更するが、同時に変更が起こった場合不整合が起こる
     my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
@@ -77,6 +76,27 @@ sub edit {
             $c->user,
             \@codes,
             $c->req->string_param('description') || '',
+        );
+
+        $c->redirect(sprintf("/%s", $pick->id));
+    }
+}
+
+sub fork {
+    my ($class, $c) = @_;
+
+    $c->throw(code => 404, message => 'Not Found') unless $c->id;
+
+    my $base_pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
+    $c->throw(code => 404, message => 'Not Found') unless $base_pick;
+
+    my $pick_service = Guita::Service::Pick->new;
+    $pick_service->fill_user($base_pick);
+
+    if ($c->req->method eq 'POST') {
+        my $pick = $pick_service->fork(
+            $base_pick,
+            $c->user,
         );
 
         $c->redirect(sprintf("/%s", $pick->id));

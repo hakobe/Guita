@@ -31,9 +31,6 @@ sub _build_admin_path {
     return dir(GuitaConf('working_base'))->subdir('gitolite-admin')->stringify;
 }
 
-sub setup_repository {
-}
-
 sub add_user {
     my ($self, $user) = @_;
     my $git = $self->admin_repos;

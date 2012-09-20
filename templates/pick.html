@@ -54,6 +54,11 @@
         </li>
       [% END %]
     </ul>
+    <div class="pick-fork">
+      <form action="/[% id %]/[% head_sha %]/-/fork" method="post" class="">
+        <input class="btn" type="submit" value="Fork"></input>
+      </form>
+    </div>
     [% IF sha == head_sha && !user.is_guest && user.id == author.id %]
       <div class="pick-delete">
         <button id="pick-delete-btn" class="btn-mini btn">Delete this</button>

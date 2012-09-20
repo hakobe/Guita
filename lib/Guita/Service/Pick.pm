@@ -111,13 +111,12 @@ sub create {
 }
 
 sub edit {
-    my ($self, $pick, $author, $codes, $description) = @_;
+    my ($self, $pick, $codes, $description) = @_;
     # TODO 変更対象のファイルをロックする
     # TODO ファイルがなくなったら削除する
 
     my $work_tree = dir(GuitaConf('working_base'))->subdir($pick->id);
     my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
-
 
     # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
     $pick->update({
@@ -140,8 +139,28 @@ sub edit {
         $git->add($file->stringify);
     }
 
-    $git->commit('edited in guita web form', {author => $author});
+    $git->commit('edited in guita web form', {author => $pick->author});
     $git->run(qw( push -f origin master));
+
+    return $pick;
+}
+
+sub fork {
+    my ($self, $base_pick, $user) = @_;
+
+    my $pick = $self->dbixl->table('pick')->insert({
+        user_id        => $user->id,
+        description    => $base_pick->description,
+        parent_pick_id => $base_pick->id,
+    });
+
+    my $gitolite = Guita::Gitolite->new;
+    $gitolite->add_repository($user, $pick->id, [$user]);
+
+    my $base_git = Guita::Git->new_with_git_dir($base_pick->repository_path);
+    $base_git->run(qw( push --all), 'yohei@gitolite:'.$pick->id);
+
+    return $pick;
 }
 
 1;
