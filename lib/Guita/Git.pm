@@ -141,11 +141,11 @@ sub blob {
     });
 }
 
-sub blob_with_contents {
+sub blob_with_content {
     my ($self, $objectish, $args) = @_;
     my $blob = $self->blob($objectish, $args);
 
-    $blob->{contents} = decode_utf8($self->cat_file($objectish));
+    $blob->{content} = decode_utf8($self->cat_file($objectish));
     $blob;
 }
 

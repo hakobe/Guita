@@ -125,7 +125,8 @@ sub delete {
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
         $pick_service->fill_user($pick);
-        $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
+        $c->throw(code => 403, message => 'Forbidden') 
+            if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
         $pick->delete;
         $c->redirect('/picks');

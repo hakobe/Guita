@@ -4,13 +4,17 @@ use parent qw(Guita::Service);
 
 use Guita::Pager;
 use Guita::Service::Pick;
+use Guita::Model::User::Guest;
 use Path::Class;
+use List::MoreUtils qw(uniq);
 
 sub list {
     my ($self, $args) = @_;
 
+    my $pick_service = Guita::Service::Pick->new;
+
     # Model::List::Pick を返すようにする
-    my $picks = [
+    my @picks =
         map {
             my $pick = $_;
             my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id . '.git');
@@ -21,8 +25,7 @@ sub list {
             my $blob_with_name = $tree->blobs_list->[0];
             $blob_with_name ? +{
                 pick   => $pick,
-                name   => $blob_with_name->{name},
-                blob   => $git->blob_with_contents($blob_with_name->{obj}->objectish),
+                blob   => $git->blob_with_content($blob_with_name->{obj}->objectish),
             } : ()
         }
         grep {
@@ -34,10 +37,19 @@ sub list {
             ->limit($args->{limit})
             ->offset($args->{offset})
             ->order_by('-created')
-            ->all
-    ];
+            ->all;
 
-    return $picks;
+    my @user_ids = uniq map { $_->{pick}->user_id } grep { $_->{pick}->user_id != 0 } @picks;
+    my %user_id_to_user = 
+        map { $_->id => $_ }
+        $self->dbixl->table('user')
+            ->search({ id => {-in => \@user_ids} })
+            ->limit(scalar(@user_ids))
+            ->all;
+    $user_id_to_user{0} = Guita::Model::User::Guest->new;
+    $_->{pick}->author( $user_id_to_user{ $_->{pick}->user_id } ) for @picks;
+
+    return [ @picks ];
 }
 
 

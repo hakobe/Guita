@@ -13,19 +13,13 @@ sub collect_files_for {
     return unless $git;
 
     my $files = [];
-    try {
-        $git->traverse_tree( $sha, sub {
-            my ($obj, $path) = @_;
-            push @$files, +{ # Fileオブジェクトにする
-                name => $path,
-                blob => $git->blob_with_contents($obj->objectish),
-            };
-        });
-    }
-    catch {
-        warn $_;
-    };
-    return unless @$files; # 例外返す
+    $git->traverse_tree( $sha, sub {
+        my ($obj, $path) = @_;
+        push @$files, +{ # Fileオブジェクトにする
+            path => $path,
+            blob => $git->blob_with_content($obj->objectish),
+        };
+    });
 
     return $files;
 }
@@ -37,7 +31,6 @@ sub fill_from_git {
     my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
         || Guita::Model::User::Guest->new;
 
-    # work_treeの存在チェック?
     my $git = Guita::Git->new_with_git_dir( $pick->repository_path );
     my $logs = $git->logs(10, 'HEAD');
     $sha ||= $logs->[0]->objectish;

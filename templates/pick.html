@@ -25,10 +25,10 @@
       [% FOR file IN pick.files %]
         <div class="code-show">
           <div class="code-info">
-            <span class="code-filename">[% file.name %]</span>
-            <a class="code-raw-link" href="/[% id %]/[% sha %]/[% file.name %]">raw</a>
+            <span class="code-filename">[% file.path %]</span>
+            <a class="code-raw-link" href="/[% id %]/[% sha %]/[% file.path %]">raw</a>
           </div>
-          <pre class="prettyprint linenums">[% file.blob.contents %]</pre>
+          <pre class="prettyprint linenums">[% file.blob.content %]</pre>
         </div>
       [% END %]
     </div>

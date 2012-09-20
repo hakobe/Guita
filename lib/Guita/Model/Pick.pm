@@ -1,13 +1,10 @@
 package Guita::Model::Pick;
 use prelude;
 
-use Guita::Utils qw(now);
-use DateTime;
-use DateTime::Format::MySQL;
 use Encode;
 use Path::Class qw(dir);
 
-use Class::Accessor::Lite (
+use Class::Accessor::Lite::Lazy (
     new => 1,
     rw => [
         qw(
