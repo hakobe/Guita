@@ -19,7 +19,15 @@ sub default {
 
 sub create {
     my ($class, $c) = @_;
-    if ($c->req->method eq 'POST') {
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^GET|POST$/xms;
+
+    if ($c->req->method eq 'GET') {
+        $c->html('create.html', {
+            user => $c->user,
+        });
+    }
+    elsif ($c->req->method eq 'POST') {
         my $filename = $c->req->string_param('name') || 'guitafile';
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
 
@@ -33,13 +41,12 @@ sub create {
 
         $c->redirect("/".$pick->id);
     }
-    $c->html('create.html', {
-        user => $c->user,
-    });
 }
 
 sub edit {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^GET|POST$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -73,7 +80,6 @@ sub edit {
 
         $pick_service->edit(
             $pick,
-            $c->user,
             \@codes,
             $c->req->string_param('description') || '',
         );
@@ -84,6 +90,8 @@ sub edit {
 
 sub fork {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^POST$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -105,6 +113,8 @@ sub fork {
 
 sub delete {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^POST$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -118,14 +128,15 @@ sub delete {
         $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
         $pick->delete;
+        $c->redirect('/picks');
     }
-
-    $c->redirect('/picks');
 }
 
 # pick を表示
 sub pick {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^GET$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -148,6 +159,8 @@ sub pick {
 
 sub raw {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^GET$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
     $c->throw(code => 404, message => 'Not Found') unless $c->sha;
@@ -167,6 +180,8 @@ sub raw {
 
 sub picks {
     my ($class, $c) = @_;
+    $c->throw(code => 405, message => 'Method not Allowed')
+        if $c->req->method !~ m/^GET$/xms;
 
     my $page = $c->req->number_param('page');
     my $pager = Guita::Pager->new({

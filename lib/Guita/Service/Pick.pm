@@ -9,9 +9,7 @@ use Path::Class;
 sub collect_files_for {
     my ($self, $pick, $sha) = @_;
 
-    my $git = Guita::Git->new_with_git_dir(
-        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git'),
-    );
+    my $git = Guita::Git->new_with_git_dir($pick->repository_path);
     return unless $git;
 
     my $files = [];
@@ -40,9 +38,7 @@ sub fill_from_git {
         || Guita::Model::User::Guest->new;
 
     # work_treeの存在チェック?
-    my $git = Guita::Git->new_with_git_dir(
-        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git'),
-    );
+    my $git = Guita::Git->new_with_git_dir( $pick->repository_path );
     my $logs = $git->logs(10, 'HEAD');
     $sha ||= $logs->[0]->objectish;
 
@@ -84,16 +80,16 @@ sub create {
     my $pick = $self->dbixl->table('pick')->insert({
         user_id     => $user->id,
         description => $description,
+        created     => $self->dbixl->now,
     });
 
     my $gitolite = Guita::Gitolite->new;
     $gitolite->add_repository($user, $pick->id, [$user]);
 
-    my $work_tree = dir(GuitaConf('working_base'))->subdir($pick->id)->stringify;
-    my $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $work_tree);
+    my $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $pick->working_path);
 
     # textareaの内容をファイルに書きだして
-    my $file = dir($work_tree)->file($filename);
+    my $file = dir($pick->working_path)->file($filename);
     my $fh = $file->openw;
     $content = $content . ''; # copy
     $content =~ s/\r\n/\n/g;
@@ -112,22 +108,26 @@ sub create {
 
 sub edit {
     my ($self, $pick, $codes, $description) = @_;
-    # TODO 変更対象のファイルをロックする
-    # TODO ファイルがなくなったら削除する
-
-    my $work_tree = dir(GuitaConf('working_base'))->subdir($pick->id);
-    my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
 
     # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
     $pick->update({
         description => $description,
-        modified    => $self->dbixl->now(),
+        modified    => $self->dbixl->now.q(),
     });
 
-    $git->run(qw(reset --hard)); # 不要?
+    my $git;
+    if ( -e $pick->working_path ) {
+        $git = Guita::Git->new_with_work_tree($pick->working_path);
+        $git->run(qw(fetch));
+        $git->run(qw(reset --hard origin/master)); # 不要?
+    }
+    else {
+        $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $pick->working_path);
+    }
 
+    # TODO ファイルがなくなったら削除する
     for my $code (@$codes) {
-        my $file = $work_tree->file($code->{path});
+        my $file = dir($pick->working_path)->file($code->{path});
         next unless -e $file;
 
         my $fh = $file->openw;
@@ -152,6 +152,7 @@ sub fork {
         user_id        => $user->id,
         description    => $base_pick->description,
         parent_pick_id => $base_pick->id,
+        created     => $self->dbixl->now,
     });
 
     my $gitolite = Guita::Gitolite->new;

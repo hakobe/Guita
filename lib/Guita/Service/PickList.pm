@@ -30,7 +30,11 @@ sub list {
             my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id . '.git');
             -e $work_tree->stringify;
         }
-        $self->dbixl->table('pick')->limit($args->{limit})->offset($args->{offset})->all
+        $self->dbixl->table('pick')
+            ->limit($args->{limit})
+            ->offset($args->{offset})
+            ->order_by('-created')
+            ->all
     ];
 
     return $picks;
