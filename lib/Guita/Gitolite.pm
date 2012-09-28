@@ -15,7 +15,7 @@ sub _build_admin_repos {
 
     if (!(-e $self->admin_path)) {
         Guita::Git->clone(
-            'yohei@gitolite:gitolite-admin',
+            GuitaConf('remote_repository_base').'gitolite-admin',
             $self->admin_path,
         );
     }

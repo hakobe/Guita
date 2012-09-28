@@ -79,7 +79,7 @@ sub create {
     my $gitolite = Guita::Gitolite->new;
     $gitolite->add_repository($user, $pick->id, [$user]);
 
-    my $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $pick->working_path);
+    my $git = Guita::Git->clone(GuitaConf('remote_repository_base') . $pick->id, $pick->working_path);
 
     # textareaの内容をファイルに書きだして
     my $file = dir($pick->working_path)->file($filename);
@@ -115,7 +115,7 @@ sub edit {
         $git->run(qw(reset --hard origin/master)); # 不要?
     }
     else {
-        $git = Guita::Git->clone('yohei@gitolite:' . $pick->id, $pick->working_path);
+        $git = Guita::Git->clone(GuitaConf('remote_repository_base') . $pick->id, $pick->working_path);
     }
 
     # TODO ファイルがなくなったら削除する
@@ -152,7 +152,7 @@ sub fork {
     $gitolite->add_repository($user, $pick->id, [$user]);
 
     my $base_git = Guita::Git->new_with_git_dir($base_pick->repository_path);
-    $base_git->run(qw( push --all), 'yohei@gitolite:'.$pick->id);
+    $base_git->run(qw( push --all), GuitaConf('remote_repository_base').$pick->id);
 
     return $pick;
 }

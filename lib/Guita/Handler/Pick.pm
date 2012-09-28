@@ -76,6 +76,7 @@ sub edit {
         my @codes;
         # ディレクトリとらばーさる的なチェック
         while (my ($path, $content) = $code_generator->()) {
+            $content =~ s/\r\n/\n/xmsg;
             push @codes, { path => $path, content => $content };
         }
 
@@ -155,7 +156,7 @@ sub pick {
         sha             => $c->sha || $pick->logs->[0]->objectish,
         head_sha        => $pick->logs->[0]->objectish,
         pick            => $pick,
-        repository_url  => GuitaConf('remote_repository_base') . '/' . $c->id,
+        repository_url  => GuitaConf('remote_repository_base') . $c->id,
     });
 }
 
