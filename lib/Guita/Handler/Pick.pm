@@ -19,15 +19,7 @@ sub default {
 
 sub create {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^GET|POST$/xms;
-
-    if ($c->req->method eq 'GET') {
-        $c->html('create.html', {
-            user => $c->user,
-        });
-    }
-    elsif ($c->req->method eq 'POST') {
+    if ($c->req->method eq 'POST') {
         my $filename = $c->req->string_param('name') || 'guitafile';
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
 
@@ -41,15 +33,17 @@ sub create {
 
         $c->redirect("/".$pick->id);
     }
+    $c->html('create.html', {
+        user => $c->user,
+    });
 }
 
 sub edit {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^GET|POST$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
+    # HEADを変更するが、同時に変更が起こった場合不整合が起こる
     my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
@@ -74,14 +68,13 @@ sub edit {
 
         my $code_generator = each_array(@paths, @contents);
         my @codes;
-        # ディレクトリとらばーさる的なチェック
         while (my ($path, $content) = $code_generator->()) {
-            $content =~ s/\r\n/\n/xmsg;
             push @codes, { path => $path, content => $content };
         }
 
         $pick_service->edit(
             $pick,
+            $c->user,
             \@codes,
             $c->req->string_param('description') || '',
         );
@@ -90,33 +83,8 @@ sub edit {
     }
 }
 
-sub fork {
-    my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^POST$/xms;
-
-    $c->throw(code => 404, message => 'Not Found') unless $c->id;
-
-    my $base_pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
-    $c->throw(code => 404, message => 'Not Found') unless $base_pick;
-
-    my $pick_service = Guita::Service::Pick->new;
-    $pick_service->fill_user($base_pick);
-
-    if ($c->req->method eq 'POST') {
-        my $pick = $pick_service->fork(
-            $base_pick,
-            $c->user,
-        );
-
-        $c->redirect(sprintf("/%s", $pick->id));
-    }
-}
-
 sub delete {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^POST$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -127,19 +95,17 @@ sub delete {
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
         $pick_service->fill_user($pick);
-        $c->throw(code => 403, message => 'Forbidden') 
-            if $pick->author->is_guest || $c->user->id ne $pick->author->id;
+        $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
         $pick->delete;
-        $c->redirect('/picks');
     }
+
+    $c->redirect('/picks');
 }
 
 # pick を表示
 sub pick {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^GET$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
@@ -156,14 +122,12 @@ sub pick {
         sha             => $c->sha || $pick->logs->[0]->objectish,
         head_sha        => $pick->logs->[0]->objectish,
         pick            => $pick,
-        repository_url  => GuitaConf('remote_repository_base') . $c->id,
+        repository_url  => GuitaConf('remote_repository_base') . '/' . $c->id,
     });
 }
 
 sub raw {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^GET$/xms;
 
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
     $c->throw(code => 404, message => 'Not Found') unless $c->sha;
@@ -183,8 +147,6 @@ sub raw {
 
 sub picks {
     my ($class, $c) = @_;
-    $c->throw(code => 405, message => 'Method not Allowed')
-        if $c->req->method !~ m/^GET$/xms;
 
     my $page = $c->req->number_param('page');
     my $pager = Guita::Pager->new({

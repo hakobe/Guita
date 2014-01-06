@@ -3,23 +3,30 @@ use prelude;
 use parent qw(Guita::Service);
 
 use Guita::Git;
-use Guita::Gitolite;
 use Path::Class;
 
 sub collect_files_for {
     my ($self, $pick, $sha) = @_;
 
-    my $git = Guita::Git->new_with_git_dir($pick->repository_path);
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id),
+    );
     return unless $git;
 
     my $files = [];
-    $git->traverse_tree( $sha, sub {
-        my ($obj, $path) = @_;
-        push @$files, +{ # Fileオブジェクトにする
-            path => $path,
-            blob => $git->blob_with_content($obj->objectish),
-        };
-    });
+    try {
+        $git->traverse_tree( $sha, sub {
+            my ($obj, $path) = @_;
+            push @$files, +{ # Fileオブジェクトにする
+                name => $path,
+                blob => $git->blob_with_contents($obj->objectish),
+            };
+        });
+    }
+    catch {
+        warn $_;
+    };
+    return unless @$files; # 例外返す
 
     return $files;
 }
@@ -31,7 +38,10 @@ sub fill_from_git {
     my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
         || Guita::Model::User::Guest->new;
 
-    my $git = Guita::Git->new_with_git_dir( $pick->repository_path );
+    # work_treeの存在チェック?
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
+    );
     my $logs = $git->logs(10, 'HEAD');
     $sha ||= $logs->[0]->objectish;
 
@@ -58,8 +68,8 @@ sub file_content_at {
     my ($self, $pick, $sha, $path) = @_;
     return unless $pick;
 
-    my $git = Guita::Git->new_with_git_dir(
-        dir(GuitaConf('repository_base'))->subdir($pick->id . '.git')->stringify,
+    my $git = Guita::Git->new_with_work_tree(
+        dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify,
     );
 
     my $object = $git->object_for_path($sha, $path);
@@ -73,16 +83,17 @@ sub create {
     my $pick = $self->dbixl->table('pick')->insert({
         user_id     => $user->id,
         description => $description,
-        created     => $self->dbixl->now,
     });
 
-    my $gitolite = Guita::Gitolite->new;
-    $gitolite->add_repository($user, $pick->id, [$user]);
+    # bare でうまいことしたいなぁ
+    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id)->stringify;
+    my $git = Guita::Git->init($work_tree);
+    $git->config(qw(receive.denyCurrentBranch ignore));
 
-    my $git = Guita::Git->clone(GuitaConf('remote_repository_base') . $pick->id, $pick->working_path);
+    # まともなエラー処理
 
     # textareaの内容をファイルに書きだして
-    my $file = dir($pick->working_path)->file($filename);
+    my $file = dir($work_tree)->file($filename);
     my $fh = $file->openw;
     $content = $content . ''; # copy
     $content =~ s/\r\n/\n/g;
@@ -94,33 +105,29 @@ sub create {
 
     # commit
     $git->commit('edited in guita web form', {author => $user});
-    $git->run(qw( push -f origin master));
 
     return $pick;
 }
 
 sub edit {
-    my ($self, $pick, $codes, $description) = @_;
+    my ($self, $pick, $author, $codes, $description) = @_;
+    # TODO 変更対象のファイルをロックする
+    # TODO ファイルがなくなったら削除する
+
+    my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+    my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
+
 
     # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
     $pick->update({
         description => $description,
-        modified    => $self->dbixl->now.q(),
+        modified    => $self->dbixl->now(),
     });
 
-    my $git;
-    if ( -e $pick->working_path ) {
-        $git = Guita::Git->new_with_work_tree($pick->working_path);
-        $git->run(qw(fetch));
-        $git->run(qw(reset --hard origin/master)); # 不要?
-    }
-    else {
-        $git = Guita::Git->clone(GuitaConf('remote_repository_base') . $pick->id, $pick->working_path);
-    }
+    $git->run(qw(reset --hard)); # 不要?
 
-    # TODO ファイルがなくなったら削除する
     for my $code (@$codes) {
-        my $file = dir($pick->working_path)->file($code->{path});
+        my $file = $work_tree->file($code->{path});
         next unless -e $file;
 
         my $fh = $file->openw;
@@ -132,29 +139,7 @@ sub edit {
         $git->add($file->stringify);
     }
 
-    $git->commit('edited in guita web form', {author => $pick->author});
-    $git->run(qw( push -f origin master));
-
-    return $pick;
-}
-
-sub fork {
-    my ($self, $base_pick, $user) = @_;
-
-    my $pick = $self->dbixl->table('pick')->insert({
-        user_id        => $user->id,
-        description    => $base_pick->description,
-        parent_pick_id => $base_pick->id,
-        created     => $self->dbixl->now,
-    });
-
-    my $gitolite = Guita::Gitolite->new;
-    $gitolite->add_repository($user, $pick->id, [$user]);
-
-    my $base_git = Guita::Git->new_with_git_dir($base_pick->repository_path);
-    $base_git->run(qw( push --all), GuitaConf('remote_repository_base').$pick->id);
-
-    return $pick;
+    $git->commit('edited in guita web form', {author => $author});
 }
 
 1;

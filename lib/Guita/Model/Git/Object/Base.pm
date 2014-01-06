@@ -5,7 +5,7 @@ use warnings;
 use Class::Accessor::Lite (
     new => 1,
     ro => [qw(
-        content objectish size type mode name
+        contents objectish size type mode name
     )],
 );
 

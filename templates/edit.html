@@ -6,9 +6,9 @@
   [% FOR file IN pick.files %]
     <div>
         <br>
-        <input class="code-filename" type="text" name="name" value="[% file.path %]" placeholder="filename" readonly="readonly"></input>
+        <input class="code-filename" type="text" name="name" value="[% file.name %]" placeholder="filename" readonly="readonly"></input>
         <br>
-        <textarea class="code" name="code" rows="15" cols="80" placeholder="write your code">[% file.blob.content %]</textarea>
+        <textarea class="code" name="code" rows="15" cols="80" placeholder="write your code">[% file.blob.contents %]</textarea>
         <br>
     </div>
   [% END %]

@@ -20,16 +20,16 @@
             <a href="/[% recent.pick.id %]">[% strip(recent.pick.description, 140) || recent.pick.id %]</a>
             <div class="pick-info-short-sub">
               [% recent.pick.modified %]
-              [% IF !recent.pick.author.is_guest %]
+              [% IF !recent.author.is_guest %]
               <span class="avator-img">
                 by 
-                <a href="/[% recent.pick.author.name %]"><img src="[% recent.pick.author.avatar_url %]"></img></a>
-                <a href="/[% recent.pick.author.name %]">[% recent.pick.author.name %]</a>
+                <a href="/[% recent.author.name %]"><img src="[% recent.author.avatar_url %]"></img></a>
+                <a href="/[% recent.author.name %]">[% recent.author.name %]</a>
               </span>
             </div>
             [% END %]
           </div>
-          <pre class="prettyprint linenums">[% strip(recent.blob.content, 140) %]</pre>
+          <pre class="prettyprint linenums">[% strip(recent.blob.contents, 140) %]</pre>
         </div>
       [% END %]
       <div class="picks-pager">

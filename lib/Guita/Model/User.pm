@@ -40,10 +40,9 @@ sub avatar_url {
     $self->struct->{api}->{user}->{avatar_url};
 }
 
-sub ssh_key {
+sub ssh_keys {
     my ($self) = @_;
-    my @ssh_keys = map { $_->{key} } grep { $_->{verified} } @{ $self->struct->{api}->{user_keys} };
-    return $ssh_keys[0];
+    join "\n", map { $_->{key} } @{ $self->struct->{api}->{user_keys} };
 }
 
 1;

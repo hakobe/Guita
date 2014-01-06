@@ -33,15 +33,6 @@ sub init {
     $class->new_with_work_tree($work_tree);
 }
 
-sub clone {
-    my ($class, $url, $work_tree) = @_;
-    # エラー処理まともにする
-    dir($work_tree)->mkpath unless -e $work_tree;
-    $class->run(clone => $url, $work_tree);
-
-    $class->new_with_work_tree($work_tree);
-}
-
 sub add {
     my ($self, $filepath) = @_;
 
@@ -141,11 +132,11 @@ sub blob {
     });
 }
 
-sub blob_with_content {
+sub blob_with_contents {
     my ($self, $objectish, $args) = @_;
     my $blob = $self->blob($objectish, $args);
 
-    $blob->{content} = decode_utf8($self->cat_file($objectish));
+    $blob->{contents} = decode_utf8($self->cat_file($objectish));
     $blob;
 }
 
