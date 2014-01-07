@@ -1,9 +1,3 @@
-use inc::Module::Install;
-
-name    'Guita';
-version '0.00';
-license 'in-company'; 
-
 requires 'Module::Install';
 requires 'Plack';
 requires 'Plack::Session';
@@ -15,7 +9,6 @@ requires 'parent';
 requires 'DBI';
 requires 'DBD::mysql';
 requires 'Path::Class';
-requires 'File::Spec';
 requires 'Class::Accessor::Lite';
 requires 'Class::Accessor::Lite::Lazy';
 requires 'Encode';
@@ -42,12 +35,8 @@ requires 'Hash::MultiValue';
 requires 'HTML::Trim';
 requires 'Git::Repository';
 requires 'Digest::SHA1';
-requires 'Data::Dumper';
 requires 'Config::ENV';
 requires 'Router::Simple';
-requires 'Devel::KYTProf';
 
 requires 'DBIx::Lite';
 requires 'DBIx::Sunny';
-
-WriteAll;
