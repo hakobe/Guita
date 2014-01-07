@@ -2,7 +2,6 @@
 
 use strict;
 use warnings;
-use Devel::KYTProf;
 
 use lib glob 'modules/*/lib';
 use lib 'lib';

@@ -8,7 +8,7 @@ sub dsn { GuitaConf('dsn_guita') }
 sub connect {
     my $class = shift;
     return $class->SUPER::connect(
-        $class->dsn, 'nobody', 'nobody', {
+        $class->dsn, undef, undef, {
             mysql_enable_utf8 => 1,
             Callbacks => { connected => \&_connect_cb },
             RootClass => 'DBIx::Sunny',
@@ -18,7 +18,6 @@ sub connect {
 
 sub _connect_cb {
     my $dbh = shift;
-    $dbh->do(sprintf q(SET time_zone = '%s'), __PACKAGE__->time_zone);
     return;
 }
 
@@ -40,11 +39,8 @@ sub schema {
 sub now {
     my $self = shift;
     return DateTime->now(
-        time_zone => $self->time_zone,
         formatter => 'DateTime::Format::MySQL',
     );
 }
-
-sub time_zone { 'Asia/Tokyo' }
 
 1;
