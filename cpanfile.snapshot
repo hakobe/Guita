@@ -1787,6 +1787,27 @@ DISTRIBUTIONS
       overload 0
       strict 0
       warnings 0
+  Git-Repository-Plugin-Log-1.310
+    pathname: B/BO/BOOK/Git-Repository-Plugin-Log-1.310.tar.gz
+    provides:
+      Git::Repository::Log 1.310
+      Git::Repository::Log::Iterator 1.310
+      Git::Repository::Plugin::Log 1.310
+    requirements:
+      Carp 0
+      Cwd 0
+      ExtUtils::MakeMaker 6.30
+      File::Find 0
+      File::Spec 0
+      File::Temp 0
+      Git::Repository 1.309
+      Git::Repository::Command 0
+      Git::Repository::Plugin 0
+      Scalar::Util 0
+      Test::Git 0
+      Test::More 0.88
+      strict 0
+      warnings 0
   HTML-Parser-3.71
     pathname: G/GA/GAAS/HTML-Parser-3.71.tar.gz
     provides:

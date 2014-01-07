@@ -34,6 +34,7 @@ requires 'HTTP::Request::Common';
 requires 'Hash::MultiValue';
 requires 'HTML::Trim';
 requires 'Git::Repository';
+requires 'Git::Repository::Plugin::Log';
 requires 'Digest::SHA1';
 requires 'Config::ENV';
 requires 'Router::Simple';
