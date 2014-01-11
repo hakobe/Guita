@@ -19,8 +19,6 @@ use Guita::DataBase;
 use Guita::Git;
 use DBI;
 
-#use Guita::Mapper::DBI;
-#use Guita::Mapper::DBI::User;
 use Guita::Model::User::Guest;
 
 our $router = Router::Simple->new;
