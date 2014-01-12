@@ -1,7 +1,6 @@
 package Guita::Handler::Pick;
 use prelude;
 
-use Guita::Git;
 use Guita::Model::User::Guest;
 use Guita::Service::Pick;
 use Guita::Service::PickList;
