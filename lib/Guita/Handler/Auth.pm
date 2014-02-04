@@ -93,15 +93,6 @@ sub callback {
     my $domain = $c->req->uri->host;
     $c->res->headers->header('Set-Cookie' => qq[csk=$sk; path=/; expires=$expires; domain=$domain;]);
 
-#    if (config->param('authorized_keys')) {
-#        my $authorized_keys = file(config->param('authorized_keys'))->absolute;
-#        my $fh = $authorized_keys->open('w+');
-#        if ($fh) {
-#            print $fh "\n".$user->ssh_keys;
-#            close $fh;
-#        }
-#    }
-
     $c->redirect('/');
 }
 
