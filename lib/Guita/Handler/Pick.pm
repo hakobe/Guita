@@ -18,6 +18,8 @@ sub default {
 
 sub create {
     my ($class, $c) = @_;
+    $c->redirect('/auth') if $c->user->is_guest;
+
     if ($c->req->method eq 'POST') {
         my $filename = $c->req->string_param('name') || 'guitafile';
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
