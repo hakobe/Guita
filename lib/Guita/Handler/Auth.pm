@@ -31,31 +31,37 @@ sub callback {
     $c->throw(code => 400, message => 'Bad Request') unless $c->req->param('code');
 
     my $ua = LWP::UserAgent->new;
-    my $token_res = $ua->request(POST(
-        'https://github.com/login/oauth/access_token', 
-        [
-            client_id     => GuitaConf('github_client_id'),
-            client_secret => GuitaConf('github_client_secret'),
-            code          => scalar($c->req->param('code')),
-        ],
-    ));
-    $c->throw(code => 400, message => 'Bad Request: token') if $token_res->is_error;
+    my $access_token = do {
+        my $res = $ua->request(POST(
+            'https://github.com/login/oauth/access_token', 
+            [
+                client_id     => GuitaConf('github_client_id'),
+                client_secret => GuitaConf('github_client_secret'),
+                code          => scalar($c->req->param('code')),
+            ],
+        ));
+        $c->throw(code => 400, message => 'Bad Request: token') if $res->is_error;
 
-    my ($access_token) = $token_res->content =~ m/access_token=(.*?)(?:&|$)/xms;
+        my ($access_token) = $res->content =~ m/access_token=(.*?)(?:&|$)/xms;
+        $access_token;
+    };
 
-    # user json
-    my $user_res = $ua->request(GET(
-        'https://api.github.com/user?access_token=' . uri_escape($access_token),
-    ));
-    $c->throw(code => 400, message => 'Bad Request: user json') if $user_res->is_error;
-    my $user_json = decode_json($user_res->content);
+    my $user_json = do {
+        my $res = $ua->request(GET(
+            'https://api.github.com/user?access_token=' . uri_escape($access_token),
+        ));
+        $c->throw(code => 400, message => 'Bad Request: user json') if $res->is_error;
+        decode_json($res->content);
+    };
 
     # user keys json
-    my $user_keys_res = $ua->request(GET(
-        'https://api.github.com/user/keys?access_token=' . uri_escape($access_token),
-    ));
-    $c->throw(code => 400, message => 'Bad Request: user keys json') if $user_keys_res->is_error;
-    my $user_keys_json = decode_json($user_keys_res->content);
+    my $user_keys_json = do {
+        my $user_keys_res = $ua->request(GET(
+            'https://api.github.com/user/keys?access_token=' . uri_escape($access_token),
+        ));
+        $c->throw(code => 400, message => 'Bad Request: user keys json') if $user_keys_res->is_error;
+        decode_json($user_keys_res->content);
+    };
 
     my $sk = sha1_hex(
         join('-', 'salt', GuitaConf('session_key_salt'), $user_json->{id}, time())
