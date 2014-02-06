@@ -78,7 +78,6 @@ sub file_content_at {
 
 sub create {
     my ($self, $user, $filename, $content, $description) = @_;
-    # asert
 
     my $pick = $self->dbixl->table('pick')->insert({
         user_id     => $user->id,
