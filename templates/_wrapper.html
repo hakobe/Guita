@@ -45,10 +45,10 @@
                     <a href="/mine"><img src="[% user.avatar_url %]"></img></a>
                   </li>
                 [% END %]
-                <li><a href="/mine">[% user.name %]</a></li>
                 [% IF user.is_guest %]
                   <li><a href="/auth">login</a></li>
                 [% ELSE %]
+                  <li><a href="/mine">[% user.name %]</a></li>
                   <li><a href="/auth/logout">logout</a></li>
                 [% END %]
               </ul>
