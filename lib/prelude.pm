@@ -21,6 +21,7 @@ sub import {
             package $pkg;
             use Guita::Config qw(GuitaConf);
             use Try::Tiny;
+            use Carp qw(croak);
         ];
         die $@ if $@;
     }

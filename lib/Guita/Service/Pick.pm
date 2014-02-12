@@ -125,10 +125,10 @@ sub edit {
         $code =~ s/\r\n/\n/g;
 
         my $fh = $file->openw;
-        flock($fh, LOCK_EX) or die "Cannot lock $code->{path}: $!\n";
+        flock($fh, LOCK_EX) or croak "Cannot lock $code->{path}: $!\n";
         seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n"; # ロック中になにか書き込まれてたらいけないので
         print $fh $code->{content};
-        flock($fh, LOCK_UN) or die "Cannot unlock $code->{path}: $!\n";
+        flock($fh, LOCK_UN) or croak "Cannot unlock $code->{path}: $!\n";
         close $fh;
 
         # add して
