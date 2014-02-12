@@ -4,6 +4,7 @@ use parent qw(Guita::Service);
 
 use Guita::Git;
 use Path::Class;
+use Fcntl qw(:flock SEEK_END);
 
 sub collect_files_for {
     my ($self, $pick, $sha) = @_;
@@ -110,7 +111,6 @@ sub create {
 
 sub edit {
     my ($self, $pick, $author, $codes, $description) = @_;
-    # TODO 変更対象のファイルをロックする
     # TODO ファイルがなくなったら削除する
 
     my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
@@ -129,9 +129,13 @@ sub edit {
         my $file = $work_tree->file($code->{path});
         next unless -e $file;
 
-        my $fh = $file->openw;
         $code =~ s/\r\n/\n/g;
+
+        my $fh = $file->openw;
+        flock($fh, LOCK_EX) or die "Cannot lock $code->{path}: $!\n";
+        seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n"; # ロック中になにか書き込まれてたらいけないので
         print $fh $code->{content};
+        flock($fh, LOCK_UN) or die "Cannot unlock $code->{path}: $!\n";
         close $fh;
 
         # add して
