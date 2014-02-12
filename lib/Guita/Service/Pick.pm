@@ -116,13 +116,6 @@ sub edit {
     my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
     my $git = Guita::Git->new_with_work_tree($work_tree->stringify);
 
-
-    # XXX modified を更新するのにdescriptionの変更がなくてもupdateする
-    $pick->update({
-        description => $description,
-        modified    => $self->dbixl->now(),
-    });
-
     $git->run(qw(reset --hard)); # 不要?
 
     for my $code (@$codes) {
@@ -143,6 +136,11 @@ sub edit {
     }
 
     $git->commit('edited in guita web form', {author => $author});
+
+    $pick->update({
+        description => $description,
+        modified    => $self->dbixl->now(),
+    });
 }
 
 1;
