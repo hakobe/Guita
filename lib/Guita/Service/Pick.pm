@@ -126,7 +126,7 @@ sub edit {
 
         my $fh = $file->openw;
         flock($fh, LOCK_EX) or croak "Cannot lock $code->{path}: $!\n";
-        seek($fh, 0, SEEK_END) or die "Cannot seek - $!\n"; # ロック中になにか書き込まれてたらいけないので
+        seek($fh, 0, SEEK_END) or croak "Cannot seek - $!\n"; # ロック中になにか書き込まれてたらいけないので
         print $fh $code->{content};
         flock($fh, LOCK_UN) or croak "Cannot unlock $code->{path}: $!\n";
         close $fh;
