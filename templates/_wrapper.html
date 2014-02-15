@@ -7,23 +7,9 @@
     <link rel="shortcut icon" href="/img/favicon.ico" type="image/x-icon"/>
     <link href='//fonts.googleapis.com/css?family=Bigshot+One' rel='stylesheet' type='text/css'>
 
-    [%- JS = [] %]
-    [%- JS.push("//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
-    [%- JS.push("//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
-    [%- JS.push("/js/prettify.js") %]
-    [%- JS.push("/js/bootstrap.js") %]
-
-    [%- FOR path IN JS %]
-    <script type="text/javascript" src="[% path %]"></script>
-    [%- END %]
-
-    <!--[if lt IE 9]>
-    <script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-
     <!-- <link rel="stylesheet" href="/js/highlight/styles/zenburn.css" type="text/css" media="all" /> -->
-    <link rel="stylesheet" href="/css/bootstrap.css" type="text/css" media="all" />
     <link rel="stylesheet" href="/css/prettify.css" type="text/css" media="all" />[% # XXX %]
+    <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/guita.css" type="text/css" media="all" />
 
   </head>
@@ -68,5 +54,14 @@
       </div>
 
     </div>
+    [%- JS = [] %]
+    [%- JS.push("//ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js") %]
+    [%- JS.push("//ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js") %]
+    [%- JS.push("//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js") %]
+    [%- JS.push("/js/prettify.js") %]
+
+    [%- FOR path IN JS %]
+    <script type="text/javascript" src="[% path %]"></script>
+    [%- END %]
   </body>
 </html>
