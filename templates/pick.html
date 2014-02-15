@@ -1,7 +1,7 @@
 [% WRAPPER '_wrapper.html' WITH nav = '' %]
 
 <div class="row">
-  <div id="pick-info" class="span10">
+  <div id="pick-info" class="col-md-10">
     <h1 class="pick-description">
       [% pick.description || pick.id %]
       [% IF sha == head_sha %]
@@ -20,7 +20,7 @@
   </div>
 </div>
 <div class="row">
-  <div id="pick-main" class="span10">
+  <div id="pick-main" class="col-md-10">
     <div id="pick-files">
       [% FOR file IN pick.files %]
         <div class="code-show">
@@ -34,7 +34,7 @@
     </div>
   </div>
 
-  <div id="pick-sidebar" class="span2">
+  <div id="pick-sidebar" class="col-xs-2">
     <h2>Info</h2>
     <dl>
       <dt>Author</dt>

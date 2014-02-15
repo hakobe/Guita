@@ -1,18 +1,10 @@
 [% WRAPPER '_wrapper.html' WITH nav = author ? '' : 'picks'%]
 
-<!--
 <div class="row">
-  <div class="span8">
-    <h1>Picks</h1>
-  </div>
-</div>
--->
-
-<div class="row">
-  <div class="span10">
+  <div class="col-xs-12">
     <h1>[% IF author %][% author.name %][% ELSE %][% END %]</h1>
   </div>
-  <div id="recents" class="span10">
+  <div id="recents" class="col-xs-12">
     [% IF recents.size() > 0 %]
       [% FOR recent IN recents %]
         <div class="pick-show">
@@ -43,24 +35,6 @@
       </div>
     [% END %]
   </div>
-  [% IF 0 %]
-  <div id="login" class="span4">
-    <!--
-      <div class="alert alert-info">
-        <h4 class="alert-heading">You can login.</h4>
-        When you <a href="/picks/create">create</a> code picks, they will be listed here.
-      </div>
-      -->
-
-    <!--
-    [% IF user.is_guest %]
-      <a href="/auth"><button class="btn-info btn-large">Login with github</button></a>
-    [% ELSE %]
-      <h2>[% user.name %]</h2>
-    [% END %]
-    -->
-  </div>
-  [% END %]
 </div>
 
 [% END # WRAPPER %]
