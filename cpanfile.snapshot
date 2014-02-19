@@ -2822,6 +2822,12 @@ DISTRIBUTIONS
       constant 0
       strict 0
       warnings 0
+  TOML-0.92
+    pathname: D/DA/DARREN/TOML-0.92.tar.gz
+    provides:
+      TOML 0.92
+    requirements:
+      ExtUtils::MakeMaker 0
   Test-Base-0.60
     pathname: I/IN/INGY/Test-Base-0.60.tar.gz
     provides:

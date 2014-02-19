@@ -8,10 +8,18 @@ use v5.14;
 use Exporter::Lite;
 our @EXPORT = qw(config GuitaConf);
 use Path::Class;
+use TOML qw(from_toml);
+use Carp qw(croak);
 
 sub new {
     my ($class) = @_;
-    my $config = do $class->root->file('config.pl')->stringify;
+    my $config_file = $class->root->file('config.toml');
+
+    my ($config, $error) = from_toml scalar($config_file->slurp);
+    if ($error) {
+        croak qq|Cannot load config file "@{[ $config_file->stringify ]}" : $error|;
+    }
+
     my $self = bless {
         config => $config,
     }, $class;

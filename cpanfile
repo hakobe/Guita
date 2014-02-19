@@ -38,6 +38,7 @@ requires 'Git::Repository::Plugin::Log';
 requires 'Digest::SHA1';
 requires 'Config::ENV';
 requires 'Router::Simple';
+requires 'TOML';
 
 requires 'DBIx::Lite';
 requires 'DBIx::Sunny';
