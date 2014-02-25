@@ -54,15 +54,6 @@ sub callback {
         decode_json($res->content);
     };
 
-    # user keys json
-    my $user_keys_json = do {
-        my $user_keys_res = $ua->request(GET(
-            'https://api.github.com/user/keys?access_token=' . uri_escape($access_token),
-        ));
-        $c->throw(code => 400, message => 'Bad Request: user keys json') if $user_keys_res->is_error;
-        decode_json($user_keys_res->content);
-    };
-
     my $sk = sha1_hex(
         join('-', 'salt', GuitaConf('session_key_salt'), $user_json->{id}, time())
     );
@@ -71,7 +62,6 @@ sub callback {
         $user->sk($sk);
         my $struct = $user->struct;
         $struct->{api}->{user}      = $user_json;
-        $struct->{api}->{user_keys} = $user_keys_json;
         $user->{struct} = encode_json($struct);
 
         $user->update({
@@ -88,7 +78,6 @@ sub callback {
             struct    => encode_json({
                 api => {
                     user      => $user_json,
-                    user_keys => $user_keys_json,
                 }
             }),
         });
