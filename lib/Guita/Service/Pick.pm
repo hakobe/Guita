@@ -53,16 +53,23 @@ sub fill_from_git {
     return $pick;
 }
 
-sub fill_user {
-    my ($self, $pick) = @_;
-    return unless $pick;
+sub fill_users {
+    my ($self, $picks) = @_;
+    return unless $picks;
 
-    my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
-        || Guita::Model::User::Guest->new;
+    my @authors = $self->dbixl->table('user')->search({
+        id => { -in => [ map { $_->user_id } @$picks ] },
+    })->all;
 
-    $pick->author($author);
+    my $author_by_id = {
+        map { ( $_->id => $_ )} @authors,
+    };
 
-    return $pick;
+    for my $pick (@$picks) {
+        $pick->author( $author_by_id->{$pick->user_id} || Guita::Model::User::Guest->new)
+    }
+
+    return $picks;
 }
 
 sub file_content_at {

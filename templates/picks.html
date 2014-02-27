@@ -14,9 +14,9 @@
               [% recent.pick.modified %]
               [% IF !recent.author.is_guest %]
               <span class="avator-img">
-                by 
-                <a href="/[% recent.author.name %]"><img src="[% recent.author.avatar_url %]"></img></a>
-                <a href="/[% recent.author.name %]">[% recent.author.name %]</a>
+                by
+                <a href="/[% recent.pick.author.name %]"><img src="[% recent.pick.author.avatar_url %]"></img></a>
+                <a href="/[% recent.pick.author.name %]">[% recent.pick.author.name %]</a>
               </span>
             </div>
             [% END %]

@@ -50,7 +50,7 @@ sub edit {
 
     my $pick_service = Guita::Service::Pick->new;
     $pick_service->fill_from_git($pick, $c->sha);
-    $pick_service->fill_user($pick);
+    $pick_service->fill_users([$pick]);
 
     $c->throw(code => 403, message => 'Forbidden')
         if $c->user->is_guest || $pick->author->id != $c->user->id;
@@ -95,7 +95,7 @@ sub delete {
         my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-        $pick_service->fill_user($pick);
+        $pick_service->fill_users([$pick]);
         $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
         $pick->delete;
@@ -114,7 +114,7 @@ sub pick {
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
     my $pick_service = Guita::Service::Pick->new;
-    $pick_service->fill_user($pick);
+    $pick_service->fill_users([$pick]);
     $pick_service->fill_from_git($pick, $c->sha);
 
     $c->html('pick.html', {
@@ -160,6 +160,8 @@ sub picks {
         limit  => $pager->limit,
         offset => $pager->offset,
     });
+    Guita::Service::Pick->fill_users([ map { $_->{pick}} @$picks ]);
+
 
     $c->html('picks.html', {
         user    => $c->user,
