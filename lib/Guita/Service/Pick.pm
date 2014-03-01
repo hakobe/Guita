@@ -7,7 +7,7 @@ use Path::Class;
 use Fcntl qw(:flock SEEK_END);
 
 sub collect_files_for {
-    my ($self, $pick, $sha) = @_;
+    my ($class, $pick, $sha) = @_;
 
     my $git = Guita::Git->new_with_work_tree(
         dir(GuitaConf('repository_base'))->subdir($pick->id),
@@ -33,10 +33,10 @@ sub collect_files_for {
 }
 
 sub fill_from_git {
-    my ($self, $pick, $sha) = @_;
+    my ($class, $pick, $sha) = @_;
     return unless $pick;
 
-    my $author = $self->dbixl->table('user')->search({ id => $pick->user_id })->single
+    my $author = $class->dbixl->table('user')->search({ id => $pick->user_id })->single
         || Guita::Model::User::Guest->new;
 
     # work_treeの存在チェック?
@@ -48,16 +48,16 @@ sub fill_from_git {
 
     $pick->author($author);
     $pick->logs($logs);
-    $pick->files($self->collect_files_for($pick, $sha));
+    $pick->files($class->collect_files_for($pick, $sha));
 
     return $pick;
 }
 
 sub fill_users {
-    my ($self, $picks) = @_;
+    my ($class, $picks) = @_;
     return unless $picks;
 
-    my @authors = $self->dbixl->table('user')->search({
+    my @authors = $class->dbixl->table('user')->search({
         id => { -in => [ map { $_->user_id } @$picks ] },
     })->all;
 
@@ -73,7 +73,7 @@ sub fill_users {
 }
 
 sub file_content_at {
-    my ($self, $pick, $sha, $path) = @_;
+    my ($class, $pick, $sha, $path) = @_;
     return unless $pick;
 
     my $git = Guita::Git->new_with_work_tree(
@@ -85,9 +85,9 @@ sub file_content_at {
 }
 
 sub create {
-    my ($self, $user, $filename, $content, $description) = @_;
+    my ($class, $user, $filename, $content, $description) = @_;
 
-    my $pick = $self->dbixl->table('pick')->insert({
+    my $pick = $class->dbixl->table('pick')->insert({
         user_id     => $user->id,
         description => $description,
     });
@@ -117,7 +117,7 @@ sub create {
 }
 
 sub edit {
-    my ($self, $pick, $author, $codes, $description) = @_;
+    my ($class, $pick, $author, $codes, $description) = @_;
     # TODO ファイルがなくなったら削除する
 
     my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
@@ -146,7 +146,7 @@ sub edit {
 
     $pick->update({
         description => $description,
-        modified    => $self->dbixl->now(),
+        modified    => $class->dbixl->now(),
     });
 }
 
