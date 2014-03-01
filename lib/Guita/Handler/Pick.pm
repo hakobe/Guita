@@ -3,7 +3,6 @@ use prelude;
 
 use Guita::Model::User::Guest;
 use Guita::Service::Pick;
-use Guita::Service::PickList;
 use Guita::Pager;
 use Guita::Utils qw(is_valid_filename now);
 
@@ -151,7 +150,7 @@ sub picks {
         page     => ($page && $page =~ m/^\d+$/xms) ? $page : 1,
     });
 
-    my $picks = Guita::Service::PickList->new->list({
+    my $picks = Guita::Service::Pick->list({
         limit  => $pager->limit,
         offset => $pager->offset,
     });

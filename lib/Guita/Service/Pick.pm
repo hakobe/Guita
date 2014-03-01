@@ -150,4 +150,34 @@ sub edit {
     });
 }
 
+sub list {
+    my ($class, $args) = @_;
+
+    # Model::List::Pick を返すようにする
+    my $picks = [
+        map {
+            my $pick = $_;
+            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+
+            my $git = Guita::Git->new_with_work_tree( $work_tree->stringify );
+            my $tree = $git->tree_with_children('HEAD');
+
+            my $blob_with_name = $tree->blobs_list->[0];
+            $blob_with_name ? +{
+                pick   => $pick,
+                name   => $blob_with_name->{name},
+                blob   => $git->blob_with_contents($blob_with_name->{obj}->objectish),
+            } : ()
+        }
+        grep {
+            my $pick = $_;
+            my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
+            -e $work_tree->stringify;
+        }
+        $class->dbixl->table('pick')->limit($args->{limit})->offset($args->{offset})->all
+    ];
+
+    return $picks;
+}
+
 1;
