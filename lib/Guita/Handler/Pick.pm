@@ -24,8 +24,7 @@ sub create {
         my $filename = $c->req->string_param('name') || 'guitafile';
         $c->throw(code => 400, message => 'Bad Parameter') unless is_valid_filename($filename);
 
-        my $pick_service = Guita::Service::Pick->new( dbh => $c->dbh('guita') );
-        my $pick = $pick_service->create(
+        my $pick = Guita::Service::Pick->create(
             $c->user,
             $filename,
             $c->req->string_param('code') || '',
@@ -48,9 +47,8 @@ sub edit {
     my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $pick_service = Guita::Service::Pick->new;
-    $pick_service->fill_from_git($pick, $c->sha);
-    $pick_service->fill_users([$pick]);
+    Guita::Service::Pick->fill_from_git($pick, $c->sha);
+    Guita::Service::Pick->fill_users([$pick]);
 
     $c->throw(code => 403, message => 'Forbidden')
         if $c->user->is_guest || $pick->author->id != $c->user->id;
@@ -73,7 +71,7 @@ sub edit {
             push @codes, { path => $path, content => $content };
         }
 
-        $pick_service->edit(
+        Guita::Service::Pick->edit(
             $pick,
             $c->user,
             \@codes,
@@ -90,12 +88,10 @@ sub delete {
     $c->throw(code => 404, message => 'Not Found') unless $c->id;
 
     if ($c->req->method eq 'POST') {
-        my $pick_service = Guita::Service::Pick->new;
-
         my $pick = $c->dbixl->table('pick')->search({ id => $c->id })->single;
         $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-        $pick_service->fill_users([$pick]);
+        Guita::Service::Pick->fill_users([$pick]);
         $c->throw(code => 403, message => 'Forbidden') if $pick->author->is_guest || $c->user->id ne $pick->author->id;
 
         $pick->delete;
@@ -113,9 +109,8 @@ sub pick {
     my $pick = $c->dbixl->table('pick')->search({ id => $c->id})->single;
     $c->throw(code => 404, message => 'Not Found') unless $pick;
 
-    my $pick_service = Guita::Service::Pick->new;
-    $pick_service->fill_users([$pick]);
-    $pick_service->fill_from_git($pick, $c->sha);
+    Guita::Service::Pick->fill_users([$pick]);
+    Guita::Service::Pick->fill_from_git($pick, $c->sha);
 
     $c->html('pick.html', {
         user            => $c->user,
