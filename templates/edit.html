@@ -2,17 +2,23 @@
 
 <div class="col-xs-12">
 <form action="/[% id %]/[% sha %]/-/edit" method="post" class="well code-form">
-  <input class="code-description" type="text" name="description" value="[% pick.description %]" placeholder="description"></input>
+  <div class="form-group">
+    <label for="code-description">description</label>
+    <input class="code-description form-control" type="text" id="code-description" name="description" value="[% pick.description %]" placeholder="description"></input>
+  </div>
   [% FOR file IN pick.files %]
     <div>
-        <br>
-        <input class="code-filename" type="text" name="name" value="[% file.name %]" placeholder="filename" readonly="readonly"></input>
-        <br>
-        <textarea class="code" name="code" rows="15" cols="80" placeholder="write your code">[% file.blob.contents %]</textarea>
-        <br>
+      <div class="form-group">
+        <label for="code-filename">filename</label>
+        <input class="code-filename form-control" type="text" id="code-filename" name="name" value="[% file.name %]" placeholder="filename" readonly="readonly"></input>
+      </div>
+      <div class="form-group">
+        <label for="code">code</label>
+        <textarea class="code form-control" name="code" id="code" rows="15" cols="80" placeholder="write your code">[% file.blob.contents %]</textarea>
+      </div>
     </div>
   [% END %]
-  <input class="btn-primary btn-large" type="submit" value="Save"></input>
+  <input class="btn btn-primary btn-large" type="submit" value="Save"></input>
 </form>
 </div>
 

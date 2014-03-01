@@ -55,6 +55,10 @@ h2 {
     font-size: 16px;
 }
 
+.code-filename {
+    width: 20%;
+}
+
 .picks-pager {
     font-size: 20px;
     margin: 15px auto;

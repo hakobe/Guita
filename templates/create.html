@@ -1,19 +1,22 @@
 [% WRAPPER '_wrapper.html' WITH nav = 'create' %]
 
-<div class="row">
-  <div class="col-xs-12">
-    <form action="/picks/-/create" method="post" class="well code-form">
-      <div>
-          <input class="code-description" type="text" name="description" value="" placeholder="description"></input>
-          <br>
-          <input class="code-filename" type="text" name="name" value="" placeholder="filename"></input>
-          <br>
-          <textarea class="code" name="code" rows="15" cols="80" placeholder="write your code"></textarea>
-          <br>
-          <input class="btn-primary btn-large" type="submit" value="Post"></input>
-      </div>
-    </form>
+<div class="col-xs-12">
+<form action="/picks/-/create" method="post" class="well code-form">
+  <div class="form-group">
+    <label for="code-description">description</label>
+    <input class="code-description form-control" type="text" id="code-description" name="description" value="" placeholder="description"></input>
   </div>
+    <div>
+      <div class="form-group">
+        <label for="code-filename">filename</label>
+        <input class="code-filename form-control" type="text" id="code-filename" name="name" value="" placeholder="filename"></input>
+      </div>
+      <div class="form-group">
+        <label for="code">code</label>
+        <textarea class="code form-control" name="code" id="code" rows="15" cols="80" placeholder="write your code"></textarea>
+      </div>
+    </div>
+  <input class="btn btn-primary btn-large" type="submit" value="Save"></input>
+</form>
 </div>
-
 [% END # WRAPPER %]
