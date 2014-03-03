@@ -17,7 +17,7 @@ sub default {
 
 sub create {
     my ($class, $c) = @_;
-    $c->redirect('/auth') if $c->user->is_guest;
+    $c->redirect('/auth?auth_location=/picks/-/create') if $c->user->is_guest;
 
     if ($c->req->method eq 'POST') {
         my $filename = $c->req->string_param('name') || 'guitafile';
