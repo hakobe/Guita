@@ -16,6 +16,9 @@ use DateTime::Format::HTTP;
 sub default {
     my ($self, $c) = @_;
 
+    my $auth_location = $c->req->param('auth_location') // '';
+    $c->req->session->{auth_location} = $auth_location;
+
     my $uri = URI->new('https://github.com/login/oauth/authorize');
     $uri->query_form(
         client_id => GuitaConf('github_client_id'),
@@ -88,7 +91,13 @@ sub callback {
     my $domain = $c->req->uri->host;
     $c->res->headers->header('Set-Cookie' => qq[csk=$sk; path=/; expires=$expires; domain=$domain;]);
 
-    $c->redirect('/');
+    my $auth_location = do {
+        my $loc = $c->req->session->{auth_location};
+        $loc = !$loc || ( $loc && $loc =~ m/^http/) ? '/' : $loc;
+        $loc;
+    };
+
+    $c->redirect($auth_location);
 }
 
 sub logout {
