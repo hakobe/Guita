@@ -6,10 +6,6 @@ use parent qw(Guita::Model::User);
 
 use Guita::Utils qw(now);
 
-use DateTime;
-use DateTime::Format::MySQL;
-use JSON::XS;
-
 sub is_guest { 1 }
 
 sub id { 0 }
