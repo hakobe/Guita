@@ -6,8 +6,7 @@ use warnings;
 use Guita::Base; # route
 use parent qw(Guita::Base);
 
-route "/"                => "Guita::Handler::Pick default";
-route "/picks"           => "Guita::Handler::Pick picks";
+route "/"                => "Guita::Handler::Pick picks";
 route "/picks/-/create"  => "Guita::Handler::Pick create";
 route "/mine"            => "Guita::Handler::Pick mine";
 
