@@ -164,7 +164,6 @@ sub picks {
     });
 }
 
-
 sub mine {
     my ($class, $c) = @_;
     $c->user ? $c->redirect('/'.uri_escape($c->user->name)) : $c->redirect('/picks');

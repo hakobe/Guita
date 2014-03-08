@@ -153,8 +153,18 @@ sub edit {
 sub list {
     my ($class, $args) = @_;
 
-    # Model::List::Pick を返すようにする
-    my $picks = [
+    my @picks = $class->dbixl->table('pick')
+        ->limit($args->{limit})
+        ->offset($args->{offset})
+        ->all;
+
+    return $class->to_viewable(\@picks);
+}
+
+sub to_viewable {
+    my ($class, $picks) = @_;
+
+    return [
         map {
             my $pick = $_;
             my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
@@ -173,11 +183,8 @@ sub list {
             my $pick = $_;
             my $work_tree = dir(GuitaConf('repository_base'))->subdir($pick->id);
             -e $work_tree->stringify;
-        }
-        $class->dbixl->table('pick')->limit($args->{limit})->offset($args->{offset})->all
+        } @$picks
     ];
-
-    return $picks;
 }
 
 1;
