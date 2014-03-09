@@ -161,6 +161,18 @@ sub list {
     return $class->to_viewable(\@picks);
 }
 
+sub list_for_user {
+    my ($class, $args) = @_;
+
+    my @picks = $class->dbixl->table('pick')
+        ->select({ user_id => $args->{user_id}})
+        ->limit($args->{limit})
+        ->offset($args->{offset})
+        ->all;
+
+    return $class->to_viewable(\@picks);
+}
+
 sub to_viewable {
     my ($class, $picks) = @_;
 
