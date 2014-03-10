@@ -1,4 +1,4 @@
-package Guita::Service::Pick;
+package Guita::Service::User;
 use prelude;
 use parent qw(Guita::Service);
 

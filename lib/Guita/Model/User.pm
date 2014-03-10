@@ -14,6 +14,12 @@ use Class::Accessor::Lite (
 
 sub is_guest { 0 }
 
+sub id {
+    my ($self) = @_;
+
+    return $self->get('id');
+}
+
 sub sk_expires {
     my ($self) = @_;
     DateTime::Format::MySQL->parse_datetime($self->{sk_expires})

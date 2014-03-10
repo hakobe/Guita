@@ -3,6 +3,7 @@ use prelude;
 
 use Guita::Model::User::Guest;
 use Guita::Service::Pick;
+use Guita::Service::User;
 use Guita::Pager;
 use Guita::Utils qw(is_valid_filename now);
 
@@ -145,7 +146,7 @@ sub picks {
 
     my $page = $c->req->number_param('page');
     my $pager = Guita::Pager->new({
-        count    => $c->dbixl->table('pick')->select->count,
+        count    => Guita::Service::Pick->count,
         per_page => 10,
         page     => ($page && $page =~ m/^\d+$/xms) ? $page : 1,
     });
@@ -153,6 +154,35 @@ sub picks {
     my $picks = Guita::Service::Pick->list({
         limit  => $pager->limit,
         offset => $pager->offset,
+    });
+    Guita::Service::Pick->fill_users([ map { $_->{pick}} @$picks ]);
+
+
+    $c->html('picks.html', {
+        user    => $c->user,
+        recents => $picks,
+        pager   => $pager,
+    });
+}
+
+sub picks_for_user {
+    my ($class, $c) = @_;
+    $c->throw(code => 404, message => 'Not Found') unless $c->username;
+
+    my $user = Guita::Service::User->find_user_by_name( $c->username );
+    $c->throw(code => 404, message => 'Not Found') unless $user;
+
+    my $page = $c->req->number_param('page');
+    my $pager = Guita::Pager->new({
+        count    => Guita::Service::Pick->count_for_user($user->id),
+        per_page => 10,
+        page     => ($page && $page =~ m/^\d+$/xms) ? $page : 1,
+    });
+
+    my $picks = Guita::Service::Pick->list_for_user({
+        user_id => $user->id,
+        limit   => $pager->limit,
+        offset  => $pager->offset,
     });
     Guita::Service::Pick->fill_users([ map { $_->{pick}} @$picks ]);
 

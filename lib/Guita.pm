@@ -20,7 +20,7 @@ route "/{id:[0-9]+}/:sha/-/edit"    => "Guita::Handler::Pick edit";
 route "/{id:[0-9]+}/:sha/-/delete"  => "Guita::Handler::Pick delete";
 route "/{id:[0-9]+}/:sha/:filename" => "Guita::Handler::Pick raw";
 
-route "/:username"       => "Guita::Handler::Pick picks";
+route "/:username"       => "Guita::Handler::Pick picks_for_user";
 
 1;
 __END__

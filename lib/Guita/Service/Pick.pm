@@ -161,16 +161,27 @@ sub list {
     return $class->to_viewable(\@picks);
 }
 
+sub count {
+    my ($class) = @_;
+    return $class->dbixl->table('pick')->select->count,
+}
+
 sub list_for_user {
     my ($class, $args) = @_;
 
     my @picks = $class->dbixl->table('pick')
-        ->select({ user_id => $args->{user_id}})
+        ->search({ user_id => $args->{user_id} })
         ->limit($args->{limit})
         ->offset($args->{offset})
         ->all;
 
     return $class->to_viewable(\@picks);
+}
+
+sub count_for_user {
+    my ($class, $user_id) = @_;
+    return $class->dbixl->table('pick')
+        ->search({user_id => $user_id})->count,
 }
 
 sub to_viewable {
